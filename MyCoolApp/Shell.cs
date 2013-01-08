@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-using MyCoolApp.DevelopmentEnvironment;
+using MyCoolApp.Development;
 
 namespace MyCoolApp
 {
@@ -48,7 +48,7 @@ namespace MyCoolApp
 
         private void startSharpDevelopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DevelopmentEnvironmentHub.Instance.StartDevelopmentEnvironment();
+            RemoteControlManager.Instance.StartDevelopmentEnvironment();
         }
     }
 }

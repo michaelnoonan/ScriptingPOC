@@ -45,9 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DevelopmentEnvironment\RemoteControlAnnouncementService.cs" />
-    <Compile Include="DevelopmentEnvironment\RemoteControlClient.cs" />
-    <Compile Include="DevelopmentEnvironment\DevelopmentEnvironmentHub.cs" />
+    <Compile Include="Development\RemoteControlEventListener.cs" />
+    <Compile Include="Development\RemoteControlEventSubscriber.cs" />
+    <Compile Include="Development\RemoteControlManager.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="Shell.cs">
       <SubType>Form</SubType>

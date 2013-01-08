@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IRemoteControlService.cs" />
-    <Compile Include="IRemoteControlAnnouncementService.cs" />
+    <Compile Include="IRemoteControlEventSubscriber.cs" />
     <Compile Include="PingRequest.cs" />
     <Compile Include="PingResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

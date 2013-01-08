@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using MyCoolApp.DevelopmentEnvironment;
+using MyCoolApp.Development;
 
 namespace MyCoolApp
 {
@@ -18,7 +18,7 @@ namespace MyCoolApp
 
         public void LoadScriptingProject()
         {
-            DevelopmentEnvironmentHub.Instance.LoadProject(ProjectScriptingSolutionFilePath);
+            RemoteControlManager.Instance.LoadProject(ProjectScriptingSolutionFilePath);
             
         }
     }
