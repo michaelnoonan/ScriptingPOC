@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ItemGroup>
+    <SharpDevelopBinFiles Include="$(SolutionDir)\SharpDevelop\bin\**\*.*" />
+    <SharpDevelopDataFiles Include="$(SolutionDir)\SharpDevelop\data\**\*.*" />
+    <SharpDevelopAddInFiles Include="$(SolutionDir)\SharpDevelop\AddIns\**\*.*" />
+    <SharpDevelopDocFiles Include="$(SolutionDir)\SharpDevelop\doc\**\*.*" />
+  </ItemGroup>
+
+  <PropertyGroup>
+      <SharpDevelopTargetPath>$(OutputPath)\SharpDevelop</SharpDevelopTargetPath>
+  </PropertyGroup>
+
+  <Target Name="CopyFiles" AfterTargets="AfterBuild">
+    <Error Condition="'@(SharpDevelopBinFiles)' == ''" Text="SharpDevelop project has not been built." />
+    <Copy SourceFiles="@(SharpDevelopBinFiles)" DestinationFolder="$(SharpDevelopTargetPath)\bin\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopDataFiles)" DestinationFolder="$(SharpDevelopTargetPath)\data\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopAddInFiles)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopDocFiles)" DestinationFolder="$(SharpDevelopTargetPath)\doc\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
