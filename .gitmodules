@@ -1,0 +1,3 @@
+[submodule "SharpDevelop"]
+	path = SharpDevelop
+	url = git@github.com:icsharpcode/SharpDevelop.git
