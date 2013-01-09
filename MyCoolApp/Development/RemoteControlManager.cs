@@ -26,14 +26,25 @@ namespace MyCoolApp.Development
             Process.Start(Path.Combine(Environment.CurrentDirectory, SharpDevelopExecutablePath));
         }
 
-        private IRemoteControlService GetClient()
+        private void ExecuteOperation(Action<IRemoteControlService> operation)
         {
-            if (RemoteControlUri == null)
-                throw new InvalidOperationException("The URI for the remote control service has not been announced.");
-            return _clientChannelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
+            if (IsConnectionEstablished == false)
+                throw new InvalidOperationException("There is no remote development environment connected...");
+            var client = _clientChannelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
+            try
+            {
+                operation(client);
+            }
+            catch (Exception ex)
+            {
+                // TODO: Log this sucker
+                throw;
+            }
         }
 
         public string RemoteControlUri { get; private set; }
+
+        public bool IsConnectionEstablished { get { return RemoteControlUri != null; } }
 
         private void SetRemoteControlUri(string remoteControlUri)
         {
@@ -52,11 +63,18 @@ namespace MyCoolApp.Development
 
         public void LoadProject(string projectFilePath)
         {
-            GetClient().LoadProject(projectFilePath);
+            ExecuteOperation(c => c.LoadProject(projectFilePath));
+        }
+
+        public void ShutDownDevelopmentEnvironment()
+        {
+            ExecuteOperation(c => c.ShutDown());
         }
 
         public void Dispose()
         {
+            ShutDownDevelopmentEnvironment();
+
             if (_clientChannelFactory != null)
             {
                 try

@@ -13,5 +13,8 @@ namespace SharpDevelopRemoteControl.Contracts
 
         [OperationContract]
         void LoadProject(string projectFilePath);
+
+        [OperationContract]
+        void ShutDown();
     }
 }

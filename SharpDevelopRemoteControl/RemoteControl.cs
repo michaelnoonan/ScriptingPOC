@@ -22,5 +22,11 @@ namespace SharpDevelopRemoteControl
         {
             ProjectService.LoadSolutionOrProject(projectFilePath);
         }
+
+        public void ShutDown()
+        {
+            LoggingService.Info("Shutdown command received...");
+            WorkbenchSingleton.MainWindow.Close();
+        }
     }
 }
