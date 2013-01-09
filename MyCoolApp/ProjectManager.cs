@@ -10,6 +10,16 @@ namespace MyCoolApp
         public string ProjectFileFullPath { get; private set; }
         public string ProjectScriptingSolutionFilePath { get; private set; }
 
+        public bool IsProjectLoaded { get { return ProjectFileFullPath != null; } }
+        public bool HasScriptingSolution
+        {
+            get
+            {
+                return string.IsNullOrWhiteSpace(ProjectScriptingSolutionFilePath) == false &&
+                       File.Exists(ProjectScriptingSolutionFilePath);
+            }
+        }
+
         public void LoadProject(string projectFilePath)
         {
             ProjectFileFullPath = projectFilePath;
@@ -19,7 +29,6 @@ namespace MyCoolApp
         public void LoadScriptingProject()
         {
             RemoteControlManager.Instance.LoadProject(ProjectScriptingSolutionFilePath);
-            
         }
     }
 }

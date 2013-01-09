@@ -11,6 +11,7 @@ namespace MyCoolApp
         public Shell()
         {
             InitializeComponent();
+            EvilHorribleSyncMenuItems();
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -29,6 +30,8 @@ namespace MyCoolApp
                 Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(sfd.FileName), "Scripting"));
                 ProjectManager.Instance.LoadProject(sfd.FileName);
             }
+
+            EvilHorribleSyncMenuItems();
         }
 
         private void openProjectToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -39,16 +42,31 @@ namespace MyCoolApp
             {
                 ProjectManager.Instance.LoadProject(ofd.FileName);
             }
+
+            EvilHorribleSyncMenuItems();
+
         }
 
         private void openProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ProjectManager.Instance.LoadScriptingProject();
+
+            EvilHorribleSyncMenuItems();
+
         }
 
         private void startSharpDevelopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RemoteControlManager.Instance.StartDevelopmentEnvironment();
+
+            EvilHorribleSyncMenuItems();
+
+        }
+
+        private void EvilHorribleSyncMenuItems()
+        {
+            openProjectToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
+            runScriptToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace SharpDevelopRemoteControl
     {
         public override void Run()
         {
-            CommandReceiver.Instance.Start();
+            CommandListener.Instance.Start();
             EventPublisher.Instance.Start();
         }
     }

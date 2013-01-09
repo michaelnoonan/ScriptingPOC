@@ -1,12 +1,11 @@
-﻿using System.Diagnostics;
-using ICSharpCode.Core;
+﻿using ICSharpCode.Core;
 using ICSharpCode.SharpDevelop.Gui;
 using ICSharpCode.SharpDevelop.Project;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace SharpDevelopRemoteControl
 {
-    public class RemoteControlService : IRemoteControlService
+    public class RemoteControl : IRemoteControl
     {
         public PingResponse Ping(PingRequest request)
         {
@@ -20,6 +19,7 @@ namespace SharpDevelopRemoteControl
 
         public void LoadProject(string projectFilePath)
         {
+            LoggingService.InfoFormatted("Load project command received: '{0}'", projectFilePath);
             ProjectService.LoadSolutionOrProject(projectFilePath);
         }
 

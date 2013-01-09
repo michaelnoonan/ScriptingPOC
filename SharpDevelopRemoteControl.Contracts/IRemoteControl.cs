@@ -3,7 +3,7 @@
 namespace SharpDevelopRemoteControl.Contracts
 {
     [ServiceContract]
-    public interface IRemoteControlService
+    public interface IRemoteControl
     {
         [OperationContract]
         PingResponse Ping(PingRequest request);

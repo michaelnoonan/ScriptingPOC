@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.ServiceModel;
@@ -9,24 +10,50 @@ namespace MyCoolApp.Development
     public class RemoteControlManager : IDisposable
     {
         public static readonly RemoteControlManager Instance = new RemoteControlManager();
-        
         private const string SharpDevelopExecutablePath = "SharpDevelop\\bin\\SharpDevelop.exe";
-
-        private readonly ChannelFactory<IRemoteControlService> _clientChannelFactory;
+        private readonly ChannelFactory<IRemoteControl> _clientChannelFactory;
 
         public RemoteControlManager()
         {
             _clientChannelFactory =
-                new ChannelFactory<IRemoteControlService>(
+                new ChannelFactory<IRemoteControl>(
                     new NetNamedPipeBinding());
         }
 
-        public void StartDevelopmentEnvironment()
+        public void StartDevelopmentEnvironment(string projectOrSolutionFilePath = null)
         {
-            Process.Start(Path.Combine(Environment.CurrentDirectory, SharpDevelopExecutablePath));
+            Process.Start(
+                BuildSharpDevelopExecutablePath(),
+                BuildSharpDevelopArgumentString(projectOrSolutionFilePath));
         }
 
-        private void ExecuteOperation(Action<IRemoteControlService> operation)
+        private static string BuildSharpDevelopArgumentString(string projectOrSolutionFilePath)
+        {
+            var args = new List<string>();
+            if (string.IsNullOrWhiteSpace(projectOrSolutionFilePath) == false)
+            {
+                if (File.Exists(projectOrSolutionFilePath) == false)
+                    throw new Exception(
+                        string.Format("The project or solution file does not exist at '{0}'",
+                                      projectOrSolutionFilePath));
+
+                args.Add(projectOrSolutionFilePath);
+            }
+
+            args.Add(
+                string.Format(
+                    Constant.HostApplicationListenUriParameterFormat,
+                    EventListener.Instance.ListenUri));
+
+            return string.Join(" ", args);
+        }
+
+        private static string BuildSharpDevelopExecutablePath()
+        {
+            return Path.Combine(Environment.CurrentDirectory, SharpDevelopExecutablePath);
+        }
+
+        private void ExecuteOperation(Action<IRemoteControl> operation)
         {
             if (IsConnectionEstablished == false)
                 throw new InvalidOperationException("There is no remote development environment connected...");
@@ -63,12 +90,22 @@ namespace MyCoolApp.Development
 
         public void LoadProject(string projectFilePath)
         {
-            ExecuteOperation(c => c.LoadProject(projectFilePath));
+            if (IsConnectionEstablished)
+            {
+                ExecuteOperation(c => c.LoadProject(projectFilePath));
+            }
+            else
+            {
+                StartDevelopmentEnvironment(projectFilePath);
+            }
         }
 
         public void ShutDownDevelopmentEnvironment()
         {
-            ExecuteOperation(c => c.ShutDown());
+            if (IsConnectionEstablished)
+            {
+                ExecuteOperation(c => c.ShutDown());
+            }
         }
 
         public void Dispose()

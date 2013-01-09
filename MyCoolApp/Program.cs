@@ -11,7 +11,7 @@ namespace MyCoolApp
         {
             Application.ApplicationExit += ShutDown;
 
-            RemoteControlEventListener.Instance.StartListening();
+            EventListener.Instance.StartListening();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -21,7 +21,7 @@ namespace MyCoolApp
         private static void ShutDown(object sender, EventArgs e)
         {
             RemoteControlManager.Instance.Dispose();
-            RemoteControlEventListener.Instance.Dispose();
+            EventListener.Instance.Dispose();
         }
     }
 }
