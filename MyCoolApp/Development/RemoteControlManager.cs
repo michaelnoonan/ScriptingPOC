@@ -22,6 +22,8 @@ namespace MyCoolApp.Development
 
         public void StartDevelopmentEnvironment(string projectOrSolutionFilePath = null)
         {
+            if (IsConnectionEstablished) return;
+
             Process.Start(
                 BuildSharpDevelopExecutablePath(),
                 BuildSharpDevelopArgumentString(projectOrSolutionFilePath));
@@ -76,6 +78,7 @@ namespace MyCoolApp.Development
         private void SetRemoteControlUri(string remoteControlUri)
         {
             RemoteControlUri = remoteControlUri;
+            OnConnectionStateChanged();
         }
 
         public void RemoteControlAvailableAt(string uri)
@@ -123,6 +126,14 @@ namespace MyCoolApp.Development
                     // Don't throw in dispose
                 }
             }
+        }
+
+        public event EventHandler<EventArgs> ConnectionStateChanged;
+
+        protected virtual void OnConnectionStateChanged()
+        {
+            var handler = ConnectionStateChanged;
+            if (handler != null) handler(this, EventArgs.Empty);
         }
     }
 }
