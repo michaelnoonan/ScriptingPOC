@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using MyCoolApp.Events;
 
 namespace MyCoolApp
 {
@@ -32,26 +33,15 @@ namespace MyCoolApp
             {
                 // Simulate loading a project
                 ProjectFileFullPath = projectFilePath;
-                OnProjectLoaded(projectFilePath);
+                Program.GlobalEventAggregator.Publish(new ProjectLoaded(projectFilePath));
             }
         }
 
-        public event EventHandler<ProjectLoadedEventArgs> ProjectLoaded;
-
-        protected virtual void OnProjectLoaded(string projectFileFullPath)
+        public void CloseProject()
         {
-            var handler = ProjectLoaded;
-            if (handler != null) handler(this, new ProjectLoadedEventArgs(projectFileFullPath));
-        }
-    }
-
-    public class ProjectLoadedEventArgs : EventArgs
-    {
-        public string ProjectFileFullPath { get; private set; }
-
-        public ProjectLoadedEventArgs(string projectFileFullPath)
-        {
-            ProjectFileFullPath = projectFileFullPath;
+            var projectFileBeingClosed = ProjectFileFullPath;
+            ProjectFileFullPath = null;
+            Program.GlobalEventAggregator.Publish(new ProjectClosed(projectFileBeingClosed));
         }
     }
 }

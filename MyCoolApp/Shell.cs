@@ -1,32 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using Caliburn.Micro;
 using MyCoolApp.Development;
+using MyCoolApp.Events;
+using MyCoolApp.Events.DevelopmentEnvironment;
 
 namespace MyCoolApp
 {
-    public partial class Shell : Form
+    public partial class Shell :
+        Form,
+        IHandle<ProjectLoaded>,
+        IHandle<ProjectClosed>,
+        IHandle<RemoteControlStarted>,
+        IHandle<RemoteControlShutDown>
+        
     {
+        private const string DefaultApplicationTitle = "Host Application";
+
         public Shell()
         {
-            // Add some event subscriptions to make sure we can keep in sync with system events
-            // This would normally be done with EventAggregator/Broker
-            DevelopmentEnvironmentManager.Instance.ConnectionStateChanged += HandleRemoteControlConnectionStateChange;
-
             InitializeComponent();
-
-            EvilHorribleSyncMenuItems();
-        }
-
-        protected override void OnFormClosed(FormClosedEventArgs e)
-        {
-            base.OnFormClosed(e);
-            DevelopmentEnvironmentManager.Instance.ConnectionStateChanged -= HandleRemoteControlConnectionStateChange;
-        }
-
-        private void HandleRemoteControlConnectionStateChange(object sender, EventArgs e)
-        {
-            Invoke(new Action(EvilHorribleSyncMenuItems));
+            Text = DefaultApplicationTitle;
+            EvaluateCommands();
+            Program.GlobalEventAggregator.Subscribe(this);
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -45,8 +42,6 @@ namespace MyCoolApp
                 Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(sfd.FileName), "Scripting"));
                 ProjectManager.Instance.LoadProject(sfd.FileName);
             }
-
-            EvilHorribleSyncMenuItems();
         }
 
         private void openProjectToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -57,28 +52,60 @@ namespace MyCoolApp
             {
                 ProjectManager.Instance.LoadProject(ofd.FileName);
             }
-
-            EvilHorribleSyncMenuItems();
         }
 
         private void openProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DevelopmentEnvironmentManager.Instance.LoadProject(ProjectManager.Instance.ProjectScriptingSolutionFilePath);
-
-            EvilHorribleSyncMenuItems();
+            SharpDevelopAdapter.Instance.LoadScriptingProject(ProjectManager.Instance.ProjectScriptingSolutionFilePath);
         }
 
         private void startSharpDevelopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DevelopmentEnvironmentManager.Instance.StartDevelopmentEnvironment();
-
-            EvilHorribleSyncMenuItems();
+            StatusLabel.Text = "Starting development environment...";
+            SharpDevelopAdapter.Instance.StartDevelopmentEnvironment();
         }
 
-        private void EvilHorribleSyncMenuItems()
+        private void closeProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            startSharpDevelopToolStripMenuItem.Enabled = DevelopmentEnvironmentManager.Instance.IsConnectionEstablished == false;
-            openProjectToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
+            if (ProjectManager.Instance.IsProjectLoaded)
+            {
+                ProjectManager.Instance.CloseProject();
+            }
+        }
+
+        public new void Handle(ProjectLoaded message)
+        {
+            Text = string.Format("{0} - {1}", ProjectManager.Instance.ProjectName,
+                                 ProjectManager.Instance.ProjectFileFullPath);
+            StatusLabel.Text = string.Format("Project opened: {0}", message.ProjectFileFullPath);
+            Invoke(new Action(EvaluateCommands));
+        }
+
+        public new void Handle(ProjectClosed message)
+        {
+            Text = DefaultApplicationTitle;
+            StatusLabel.Text = string.Format("Project closed: {0}", message.ProjectFilePath);
+            Invoke(new Action(EvaluateCommands));
+        }
+
+        public new void Handle(RemoteControlStarted message)
+        {
+            StatusLabel.Text = string.Format("Development environment remote control on {0}", message.ListenUri);
+            Invoke(new Action(EvaluateCommands));
+        }
+
+        public new void Handle(RemoteControlShutDown message)
+        {
+            if (IsDisposed) return;
+            StatusLabel.Text = string.Format("Development environment shut down.");
+            Invoke(new Action(EvaluateCommands));
+        }
+
+        private void EvaluateCommands()
+        {
+            closeProjectToolStripMenuItem.Enabled = ProjectManager.Instance.IsProjectLoaded;
+            scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
+            startSharpDevelopToolStripMenuItem.Enabled = !SharpDevelopAdapter.Instance.IsConnectionEstablished;
             runScriptToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
         }
     }

@@ -3,30 +3,30 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.ServiceModel;
+using Caliburn.Micro;
+using MyCoolApp.Events;
+using MyCoolApp.Events.DevelopmentEnvironment;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Development
 {
-    public class DevelopmentEnvironmentManager : IDisposable
+    public class SharpDevelopAdapter :
+        IDisposable,
+        IHandle<ProjectLoaded>,
+        IHandle<ProjectClosed>,
+        IHandle<RemoteControlStarted>,
+        IHandle<RemoteControlShutDown>
     {
-        public static readonly DevelopmentEnvironmentManager Instance = new DevelopmentEnvironmentManager();
+        public static readonly SharpDevelopAdapter Instance = new SharpDevelopAdapter();
         private const string SharpDevelopExecutablePath = "SharpDevelop\\bin\\SharpDevelop.exe";
         private readonly ChannelFactory<IRemoteControl> _clientChannelFactory;
 
-        public DevelopmentEnvironmentManager()
+        public SharpDevelopAdapter()
         {
-            ProjectManager.Instance.ProjectLoaded += HandleProjectLoaded;
+            Program.GlobalEventAggregator.Subscribe(this);
             _clientChannelFactory =
                 new ChannelFactory<IRemoteControl>(
                     new NetNamedPipeBinding());
-        }
-
-        private void HandleProjectLoaded(object sender, ProjectLoadedEventArgs e)
-        {
-            if (IsConnectionEstablished)
-            {
-                ExecuteOperation(c => c.LoadProject(ProjectManager.Instance.ProjectScriptingSolutionFilePath));
-            }
         }
 
         public void StartDevelopmentEnvironment(string projectOrSolutionFilePath = null)
@@ -54,7 +54,7 @@ namespace MyCoolApp.Development
             args.Add(
                 string.Format(
                     Constant.HostApplicationListenUriParameterFormat,
-                    EventListener.Instance.ListenUri));
+                    EventListenerHost.Instance.ListenUri));
 
             return string.Join(" ", args);
         }
@@ -90,17 +90,30 @@ namespace MyCoolApp.Development
             OnConnectionStateChanged();
         }
 
-        public void RemoteControlAvailableAt(string uri)
+        public void Handle(RemoteControlStarted message)
         {
-            SetRemoteControlUri(uri);
+            SetRemoteControlUri(message.ListenUri);
         }
 
-        public void RemoteControlShutDown()
+        public void Handle(RemoteControlShutDown message)
         {
             SetRemoteControlUri(null);
         }
 
-        public void LoadProject(string projectFilePath)
+        public void Handle(ProjectLoaded message)
+        {
+            if (IsConnectionEstablished)
+            {
+                ExecuteOperation(c => c.LoadProject(ProjectManager.Instance.ProjectScriptingSolutionFilePath));
+            }
+        }
+
+        public void Handle(ProjectClosed message)
+        {
+            ShutDownDevelopmentEnvironment();
+        }
+
+        public void LoadScriptingProject(string projectFilePath)
         {
             if (IsConnectionEstablished)
             {

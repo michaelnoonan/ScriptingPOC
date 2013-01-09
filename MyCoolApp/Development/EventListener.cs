@@ -1,46 +1,18 @@
-using System;
-using System.Diagnostics;
-using System.ServiceModel;
+using MyCoolApp.Events.DevelopmentEnvironment;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Development
 {
-    public class EventListener : IDisposable
+    public class EventListener : IDevelopmentEnvironmentEventListener
     {
-        public static readonly EventListener Instance = new EventListener();
-
-        private const string BaseUri = "net.pipe://localhost/HostApplication";
-        public string ListenUri { get { return BaseUri + "/EventSubscriber/" + _processId; } }
-
-        private readonly ServiceHost _serviceHost;
-        private readonly int _processId;
-
-        public EventListener()
+        public void RemoteControlAvailable(string listenUri)
         {
-            _processId = Process.GetCurrentProcess().Id;
-            _serviceHost = new ServiceHost(typeof(RemoteControlEventSubscriber));
+            Program.GlobalEventAggregator.Publish(new RemoteControlStarted(listenUri));
         }
 
-        public void StartListening()
+        public void ShuttingDown()
         {
-            _serviceHost.AddServiceEndpoint(
-                typeof(IRemoteControlEventSubscriber),
-                new NetNamedPipeBinding(),
-                new Uri(ListenUri));
-
-            _serviceHost.Open();
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                _serviceHost.Close();
-            }
-            catch
-            {
-                // Don't throw in dispose
-            }
+            Program.GlobalEventAggregator.Publish(new RemoteControlShutDown());
         }
     }
 }

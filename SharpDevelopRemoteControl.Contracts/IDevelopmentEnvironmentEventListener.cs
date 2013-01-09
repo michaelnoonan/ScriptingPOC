@@ -3,10 +3,10 @@
 namespace SharpDevelopRemoteControl.Contracts
 {
     [ServiceContract]
-    public interface IRemoteControlEventSubscriber
+    public interface IDevelopmentEnvironmentEventListener
     {
         [OperationContract(IsOneWay = true)]
-        void RemoteControlAvailable(string uri);
+        void RemoteControlAvailable(string listenUri);
 
         [OperationContract(IsOneWay = true)]
         void ShuttingDown();

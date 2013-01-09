@@ -10,7 +10,7 @@ namespace SharpDevelopRemoteControl
     public class EventPublisher : IDisposable
     {
         public static readonly EventPublisher Instance = new EventPublisher();
-        private readonly ChannelFactory<IRemoteControlEventSubscriber> _channelFactory;
+        private readonly ChannelFactory<IDevelopmentEnvironmentEventListener> _channelFactory;
         private readonly string _hostApplicationListenUri;
 
         public EventPublisher()
@@ -34,7 +34,7 @@ namespace SharpDevelopRemoteControl
             }
 
             _channelFactory =
-                new ChannelFactory<IRemoteControlEventSubscriber>(
+                new ChannelFactory<IDevelopmentEnvironmentEventListener>(
                     new NetNamedPipeBinding());
         }
 
@@ -64,7 +64,7 @@ namespace SharpDevelopRemoteControl
             }
         }
 
-        private void ExecuteOperation(Action<IRemoteControlEventSubscriber> operation)
+        private void ExecuteOperation(Action<IDevelopmentEnvironmentEventListener> operation)
         {
             if (IsEnabled == false) return;
 

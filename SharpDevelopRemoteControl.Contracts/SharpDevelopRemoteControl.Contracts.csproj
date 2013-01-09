@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Constant.cs" />
     <Compile Include="IRemoteControl.cs" />
-    <Compile Include="IRemoteControlEventSubscriber.cs" />
+    <Compile Include="IDevelopmentEnvironmentEventListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Windows.Forms;
+using Caliburn.Micro;
 using MyCoolApp.Development;
 
 namespace MyCoolApp
 {
     static class Program
     {
+        public static EventAggregator GlobalEventAggregator = new EventAggregator();
+
         [STAThread]
         static void Main()
         {
             Application.ApplicationExit += ShutDown;
 
-            EventListener.Instance.StartListening();
+            EventListenerHost.Instance.StartListening();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -20,8 +23,8 @@ namespace MyCoolApp
 
         private static void ShutDown(object sender, EventArgs e)
         {
-            DevelopmentEnvironmentManager.Instance.Dispose();
-            EventListener.Instance.Dispose();
+            SharpDevelopAdapter.Instance.Dispose();
+            EventListenerHost.Instance.Dispose();
         }
     }
 }

@@ -45,9 +45,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caliburn.Micro\EventAggregator.cs" />
+    <Compile Include="Caliburn.Micro\ExtensionMethods.cs" />
+    <Compile Include="Development\EventListenerHost.cs" />
     <Compile Include="Development\EventListener.cs" />
-    <Compile Include="Development\RemoteControlEventSubscriber.cs" />
-    <Compile Include="Development\DevelopmentEnvironmentManager.cs" />
+    <Compile Include="Development\SharpDevelopAdapter.cs" />
+    <Compile Include="Events\DevelopmentEnvironment\RemoteControlShutDown.cs" />
+    <Compile Include="Events\DevelopmentEnvironment\RemoteControlStarted.cs" />
+    <Compile Include="Events\ProjectClosed.cs" />
+    <Compile Include="Events\ProjectLoaded.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="Shell.cs">
       <SubType>Form</SubType>
@@ -72,6 +78,7 @@
     </Compile>
     <None Include="app.config" />
     <None Include="CopySharpDevelop.targets" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
