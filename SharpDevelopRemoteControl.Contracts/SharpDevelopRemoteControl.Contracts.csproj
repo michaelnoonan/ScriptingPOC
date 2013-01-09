@@ -43,8 +43,6 @@
     <Compile Include="Constant.cs" />
     <Compile Include="IRemoteControl.cs" />
     <Compile Include="IRemoteControlEventSubscriber.cs" />
-    <Compile Include="PingRequest.cs" />
-    <Compile Include="PingResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

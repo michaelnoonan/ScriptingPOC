@@ -7,17 +7,26 @@ using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Development
 {
-    public class RemoteControlManager : IDisposable
+    public class DevelopmentEnvironmentManager : IDisposable
     {
-        public static readonly RemoteControlManager Instance = new RemoteControlManager();
+        public static readonly DevelopmentEnvironmentManager Instance = new DevelopmentEnvironmentManager();
         private const string SharpDevelopExecutablePath = "SharpDevelop\\bin\\SharpDevelop.exe";
         private readonly ChannelFactory<IRemoteControl> _clientChannelFactory;
 
-        public RemoteControlManager()
+        public DevelopmentEnvironmentManager()
         {
+            ProjectManager.Instance.ProjectLoaded += HandleProjectLoaded;
             _clientChannelFactory =
                 new ChannelFactory<IRemoteControl>(
                     new NetNamedPipeBinding());
+        }
+
+        private void HandleProjectLoaded(object sender, ProjectLoadedEventArgs e)
+        {
+            if (IsConnectionEstablished)
+            {
+                ExecuteOperation(c => c.LoadProject(ProjectManager.Instance.ProjectScriptingSolutionFilePath));
+            }
         }
 
         public void StartDevelopmentEnvironment(string projectOrSolutionFilePath = null)
@@ -64,7 +73,7 @@ namespace MyCoolApp.Development
             {
                 operation(client);
             }
-            catch (Exception ex)
+            catch
             {
                 // TODO: Log this sucker
                 throw;

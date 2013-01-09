@@ -6,12 +6,12 @@ namespace MyCoolApp.Development
     {
         public void RemoteControlAvailable(string uri)
         {
-            RemoteControlManager.Instance.RemoteControlAvailableAt(uri);
+            DevelopmentEnvironmentManager.Instance.RemoteControlAvailableAt(uri);
         }
 
         public void ShuttingDown()
         {
-            RemoteControlManager.Instance.RemoteControlShutDown();
+            DevelopmentEnvironmentManager.Instance.RemoteControlShutDown();
         }
     }
 }

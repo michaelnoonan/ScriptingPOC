@@ -7,11 +7,6 @@ namespace SharpDevelopRemoteControl
 {
     public class RemoteControl : IRemoteControl
     {
-        public PingResponse Ping(PingRequest request)
-        {
-            return new PingResponse();
-        }
-
         public void LogMessage(string message)
         {
             LoggingService.InfoFormatted("Message Recieved: {0}", message);

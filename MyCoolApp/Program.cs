@@ -20,7 +20,7 @@ namespace MyCoolApp
 
         private static void ShutDown(object sender, EventArgs e)
         {
-            RemoteControlManager.Instance.Dispose();
+            DevelopmentEnvironmentManager.Instance.Dispose();
             EventListener.Instance.Dispose();
         }
     }

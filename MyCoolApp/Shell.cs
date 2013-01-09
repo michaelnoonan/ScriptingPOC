@@ -11,7 +11,7 @@ namespace MyCoolApp
         {
             // Add some event subscriptions to make sure we can keep in sync with system events
             // This would normally be done with EventAggregator/Broker
-            RemoteControlManager.Instance.ConnectionStateChanged += HandleRemoteControlConnectionStateChange;
+            DevelopmentEnvironmentManager.Instance.ConnectionStateChanged += HandleRemoteControlConnectionStateChange;
 
             InitializeComponent();
 
@@ -21,7 +21,7 @@ namespace MyCoolApp
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            RemoteControlManager.Instance.ConnectionStateChanged -= HandleRemoteControlConnectionStateChange;
+            DevelopmentEnvironmentManager.Instance.ConnectionStateChanged -= HandleRemoteControlConnectionStateChange;
         }
 
         private void HandleRemoteControlConnectionStateChange(object sender, EventArgs e)
@@ -63,21 +63,21 @@ namespace MyCoolApp
 
         private void openProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ProjectManager.Instance.LoadScriptingProject();
+            DevelopmentEnvironmentManager.Instance.LoadProject(ProjectManager.Instance.ProjectScriptingSolutionFilePath);
 
             EvilHorribleSyncMenuItems();
         }
 
         private void startSharpDevelopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RemoteControlManager.Instance.StartDevelopmentEnvironment();
+            DevelopmentEnvironmentManager.Instance.StartDevelopmentEnvironment();
 
             EvilHorribleSyncMenuItems();
         }
 
         private void EvilHorribleSyncMenuItems()
         {
-            startSharpDevelopToolStripMenuItem.Enabled = RemoteControlManager.Instance.IsConnectionEstablished == false;
+            startSharpDevelopToolStripMenuItem.Enabled = DevelopmentEnvironmentManager.Instance.IsConnectionEstablished == false;
             openProjectToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
             runScriptToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
         }

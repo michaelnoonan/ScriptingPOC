@@ -1,5 +1,5 @@
-﻿using System.IO;
-using MyCoolApp.Development;
+﻿using System;
+using System.IO;
 
 namespace MyCoolApp
 {
@@ -7,10 +7,15 @@ namespace MyCoolApp
     {
         public static readonly ProjectManager Instance = new ProjectManager();
 
+        public string ProjectFolder { get { return IsProjectLoaded ? Path.GetDirectoryName(ProjectFileFullPath) : null; } }
+        public string ProjectName { get { return IsProjectLoaded ? Path.GetFileNameWithoutExtension(ProjectFileFullPath) : null; } }
         public string ProjectFileFullPath { get; private set; }
-        public string ProjectScriptingSolutionFilePath { get; private set; }
+
+        public string ProjectScriptSolutionFolder { get { return IsProjectLoaded ? Path.Combine(ProjectFolder, "Scripting") : null; } }
+        public string ProjectScriptingSolutionFilePath { get { return IsProjectLoaded ? Path.Combine(ProjectScriptSolutionFolder, ProjectName + ".sln") : null; } }
 
         public bool IsProjectLoaded { get { return ProjectFileFullPath != null; } }
+        
         public bool HasScriptingSolution
         {
             get
@@ -22,13 +27,31 @@ namespace MyCoolApp
 
         public void LoadProject(string projectFilePath)
         {
-            ProjectFileFullPath = projectFilePath;
-            ProjectScriptingSolutionFilePath = Path.Combine(Path.GetDirectoryName(projectFilePath), "Scripting\\MyProject1.sln");
+            if (string.IsNullOrWhiteSpace(projectFilePath) == false &&
+                File.Exists(projectFilePath))
+            {
+                // Simulate loading a project
+                ProjectFileFullPath = projectFilePath;
+                OnProjectLoaded(projectFilePath);
+            }
         }
 
-        public void LoadScriptingProject()
+        public event EventHandler<ProjectLoadedEventArgs> ProjectLoaded;
+
+        protected virtual void OnProjectLoaded(string projectFileFullPath)
         {
-            RemoteControlManager.Instance.LoadProject(ProjectScriptingSolutionFilePath);
+            var handler = ProjectLoaded;
+            if (handler != null) handler(this, new ProjectLoadedEventArgs(projectFileFullPath));
+        }
+    }
+
+    public class ProjectLoadedEventArgs : EventArgs
+    {
+        public string ProjectFileFullPath { get; private set; }
+
+        public ProjectLoadedEventArgs(string projectFileFullPath)
+        {
+            ProjectFileFullPath = projectFileFullPath;
         }
     }
 }
