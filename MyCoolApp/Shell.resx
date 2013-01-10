@@ -123,6 +123,19 @@
   <metadata name="ToolBar.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>125, 17</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="toggleConsoleButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFKSURBVDhPrZM9S8NAGMdTmlGbKIhNmlJoSSIkxrxRGtOL
+        Zkhb0AQLHQQX6SYlLg5u4gfwq3ZwcP6bu5bEQbFEH/hxzx33/O6N4/4cy+WyZ9s26pDn+YCjSd2gtf8j
+        mM/niEgEMopBzi8RRdGvpGlaCRaLBZLJBKt3DjdPLpLoCtPp9EcmxVy6aCnIsgzhiCC5P2OS62cN4fAC
+        hJBvGY/HTFQKZrMZ65i9IdI3CfkHB893YOk+rBMPtuXCdSscx2GSUhDHMfpdDcnrER6L4tOwj+BOwei2
+        W6IOdOj6Bk3TmKgUBEEAqXPMtt+3JLQPFZZ/RW53IMsyQ5IkqKpaCTzPQ2u/BWHvAGKrQBRZS/tsTNiO
+        bREEAYqiVALTNNFoNMDz/E40m00mKQX0XemW6Nl2xTCMSlAn1uv1RlDc5gNN6uD7/sv2T9YNjvsEtJHE
+        QfKlE2IAAAAASUVORK5CYII=
+</value>
+  </data>
   <metadata name="StatusBar.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>218, 17</value>
   </metadata>

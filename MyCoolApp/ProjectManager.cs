@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using MyCoolApp.Events;
+using MyCoolApp.Model;
 
 namespace MyCoolApp
 {
@@ -8,40 +9,37 @@ namespace MyCoolApp
     {
         public static readonly ProjectManager Instance = new ProjectManager();
 
-        public string ProjectFolder { get { return IsProjectLoaded ? Path.GetDirectoryName(ProjectFileFullPath) : null; } }
-        public string ProjectName { get { return IsProjectLoaded ? Path.GetFileNameWithoutExtension(ProjectFileFullPath) : null; } }
-        public string ProjectFileFullPath { get; private set; }
+        public Project Project { get; private set; }
 
-        public string ProjectScriptSolutionFolder { get { return IsProjectLoaded ? Path.Combine(ProjectFolder, "Scripting") : null; } }
-        public string ProjectScriptingSolutionFilePath { get { return IsProjectLoaded ? Path.Combine(ProjectScriptSolutionFolder, ProjectName + ".sln") : null; } }
-
-        public bool IsProjectLoaded { get { return ProjectFileFullPath != null; } }
+        public bool IsProjectLoaded { get { return Project != null; } }
         
         public bool HasScriptingSolution
         {
             get
             {
-                return string.IsNullOrWhiteSpace(ProjectScriptingSolutionFilePath) == false &&
-                       File.Exists(ProjectScriptingSolutionFilePath);
+                return IsProjectLoaded &&
+                    string.IsNullOrWhiteSpace(Project.ScriptingProjectFilePath) == false &&
+                       File.Exists(Project.ScriptingProjectFilePath);
             }
         }
 
         public void LoadProject(string projectFilePath)
         {
-            if (string.IsNullOrWhiteSpace(projectFilePath) == false &&
-                File.Exists(projectFilePath))
+            if (IsProjectLoaded)
             {
-                // Simulate loading a project
-                ProjectFileFullPath = projectFilePath;
-                Program.GlobalEventAggregator.Publish(new ProjectLoaded(projectFilePath));
+                CloseProject();
             }
+
+            Project = new Project();
+            Project.LoadProjectFromFile(projectFilePath);
+            Program.GlobalEventAggregator.Publish(new ProjectLoaded(Project));
         }
 
         public void CloseProject()
         {
-            var projectFileBeingClosed = ProjectFileFullPath;
-            ProjectFileFullPath = null;
-            Program.GlobalEventAggregator.Publish(new ProjectClosed(projectFileBeingClosed));
+            var projectBeingClosed = Project;
+            Project = null;
+            Program.GlobalEventAggregator.Publish(new ProjectClosed(projectBeingClosed));
         }
     }
 }

@@ -12,7 +12,7 @@ namespace SharpDevelopRemoteControl
             LoggingService.InfoFormatted("Message Recieved: {0}", message);
         }
 
-        public void LoadProject(string projectFilePath)
+        public void LoadScriptingProject(string projectFilePath)
         {
             LoggingService.InfoFormatted("Load project command received: '{0}'", projectFilePath);
             ProjectService.LoadSolutionOrProject(projectFilePath);

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MyCoolApp</RootNamespace>
     <AssemblyName>MyCoolApp</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,8 +32,30 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Roslyn.Compilers">
+      <HintPath>..\packages\Roslyn.Compilers.Common.1.2.20906.2\lib\net45\Roslyn.Compilers.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Compilers.CSharp">
+      <HintPath>..\packages\Roslyn.Compilers.CSharp.1.2.20906.2\lib\net45\Roslyn.Compilers.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Compilers.VisualBasic">
+      <HintPath>..\packages\Roslyn.Compilers.VisualBasic.1.2.20906.2\lib\net45\Roslyn.Compilers.VisualBasic.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Services">
+      <HintPath>..\packages\Roslyn.Services.Common.1.2.20906.2\lib\net45\Roslyn.Services.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Services.CSharp">
+      <HintPath>..\packages\Roslyn.Services.CSharp.1.2.20906.2\lib\net45\Roslyn.Services.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Services.VisualBasic">
+      <HintPath>..\packages\Roslyn.Services.VisualBasic.1.2.20906.2\lib\net45\Roslyn.Services.VisualBasic.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Utilities">
+      <HintPath>..\packages\Roslyn.Services.Common.1.2.20906.2\lib\net45\Roslyn.Utilities.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceModel" />
@@ -54,7 +77,11 @@
     <Compile Include="Events\DevelopmentEnvironment\RemoteControlStarted.cs" />
     <Compile Include="Events\ProjectClosed.cs" />
     <Compile Include="Events\ProjectLoaded.cs" />
+    <Compile Include="Model\Project.cs" />
+    <Compile Include="Model\RecordedAction.cs" />
     <Compile Include="ProjectManager.cs" />
+    <Compile Include="Scripting\ScriptExecutor.cs" />
+    <Compile Include="Scripting\ScriptingHostModel.cs" />
     <Compile Include="Shell.cs">
       <SubType>Form</SubType>
     </Compile>

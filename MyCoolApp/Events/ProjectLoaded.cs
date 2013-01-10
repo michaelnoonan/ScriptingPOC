@@ -1,12 +1,14 @@
-﻿namespace MyCoolApp.Events
+﻿using MyCoolApp.Model;
+
+namespace MyCoolApp.Events
 {
     public class ProjectLoaded
     {
-        public string ProjectFileFullPath { get; private set; }
+        public Project LoadedProject { get; private set; }
 
-        public ProjectLoaded(string projectFileFullPath)
+        public ProjectLoaded(Project loadedProject)
         {
-            ProjectFileFullPath = projectFileFullPath;
+            LoadedProject = loadedProject;
         }
     }
 }

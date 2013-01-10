@@ -9,7 +9,7 @@ namespace SharpDevelopRemoteControl.Contracts
         void LogMessage(string message);
 
         [OperationContract]
-        void LoadProject(string projectFilePath);
+        void LoadScriptingProject(string projectFilePath);
 
         [OperationContract]
         void ShutDown();

@@ -1,12 +1,14 @@
-﻿namespace MyCoolApp.Events
+﻿using MyCoolApp.Model;
+
+namespace MyCoolApp.Events
 {
     public class ProjectClosed
     {
-        public string ProjectFilePath { get; private set; }
+        public Project ClosedProject { get; private set; }
 
-        public ProjectClosed(string projectFilePath)
+        public ProjectClosed(Project closedProject)
         {
-            ProjectFilePath = projectFilePath;
+            ClosedProject = closedProject;
         }
     }
 }

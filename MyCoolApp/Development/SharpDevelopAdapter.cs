@@ -104,7 +104,7 @@ namespace MyCoolApp.Development
         {
             if (IsConnectionEstablished)
             {
-                ExecuteOperation(c => c.LoadProject(ProjectManager.Instance.ProjectScriptingSolutionFilePath));
+                ExecuteOperation(c => c.LoadScriptingProject(message.LoadedProject.ScriptingProjectFilePath));
             }
         }
 
@@ -117,7 +117,7 @@ namespace MyCoolApp.Development
         {
             if (IsConnectionEstablished)
             {
-                ExecuteOperation(c => c.LoadProject(projectFilePath));
+                ExecuteOperation(c => c.LoadScriptingProject(projectFilePath));
             }
             else
             {
