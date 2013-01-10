@@ -7,8 +7,8 @@
     <ProjectGuid>{CB365869-4138-4ED0-9B4E-3E595A4B7634}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpDevelopRemoteControl</RootNamespace>
-    <AssemblyName>SharpDevelopRemoteControl</AssemblyName>
+    <RootNamespace>SharpDevelopRemoteControl.AddIn</RootNamespace>
+    <AssemblyName>SharpDevelopRemoteControl.AddIn</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -59,12 +59,14 @@
     <Compile Include="AutoStartCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteControl.cs" />
-    <Compile Include="EventPublisher.cs" />
+    <Compile Include="HostApplicationAdapter.cs" />
     <Compile Include="CommandListener.cs" />
+    <Compile Include="Scripting\RunCurrentScriptCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="RemoteControl.addin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>

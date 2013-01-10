@@ -7,6 +7,7 @@ using Caliburn.Micro;
 using MyCoolApp.Development;
 using MyCoolApp.Events;
 using MyCoolApp.Events.DevelopmentEnvironment;
+using MyCoolApp.Events.Scripting;
 using MyCoolApp.Scripting;
 
 namespace MyCoolApp
@@ -16,7 +17,8 @@ namespace MyCoolApp
         IHandle<ProjectLoaded>,
         IHandle<ProjectClosed>,
         IHandle<RemoteControlStarted>,
-        IHandle<RemoteControlShutDown>
+        IHandle<RemoteControlShutDown>,
+        IHandle<ScriptExecutionCompleted>
         
     {
         private const string DefaultApplicationTitle = "Host Application";
@@ -134,29 +136,20 @@ namespace MyCoolApp
 
             StatusLabel.Text = "Executing script...";
             var executor = new ScriptExecutor(ProjectManager.Instance.Project);
-            var task = executor.ExecuteScriptAsync(scriptText);
-            task.ContinueWith(HandleResultOfExecution);
+            executor.ExecuteScriptAsync(scriptText);
         }
 
-        private void HandleResultOfExecution(Task<string> task)
+        public new void Handle(ScriptExecutionCompleted message)
         {
             if (IsDisposed) return;
 
             Invoke(new Action(
                        () =>
-                           {
-                               StatusLabel.Text = "Execution complete!";
-                               if (task.Status == TaskStatus.Faulted)
-                               {
-                                   OutputTextBox.Text = string.Join(Environment.NewLine,
-                                                                    task.Exception.InnerExceptions.Select(x => x.Message));
-                               }
-                               else
-                               {
-                                   OutputTextBox.Text = task.Result;
-                               }
-                               RefreshRecordedActionsList();
-                           }));
+                       {
+                           StatusLabel.Text = "Execution complete in " + message.Result.ElapsedTime.ToString();
+                           OutputTextBox.Text = message.Result.ResultDescription;
+                           RefreshRecordedActionsList();
+                       }));
         }
 
         private void toggleConsoleButton_CheckedChanged(object sender, EventArgs e)

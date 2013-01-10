@@ -5,7 +5,7 @@ using System.ServiceModel.Description;
 using ICSharpCode.Core;
 using SharpDevelopRemoteControl.Contracts;
 
-namespace SharpDevelopRemoteControl
+namespace SharpDevelopRemoteControl.AddIn
 {
     public class CommandListener : IDisposable
     {

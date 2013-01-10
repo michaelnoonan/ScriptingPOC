@@ -14,7 +14,7 @@ namespace MyCoolApp
         {
             Application.ApplicationExit += ShutDown;
 
-            EventListenerHost.Instance.StartListening();
+            HostApplicationServiceHost.Instance.StartListening();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -24,7 +24,7 @@ namespace MyCoolApp
         private static void ShutDown(object sender, EventArgs e)
         {
             SharpDevelopAdapter.Instance.Dispose();
-            EventListenerHost.Instance.Dispose();
+            HostApplicationServiceHost.Instance.Dispose();
         }
     }
 }

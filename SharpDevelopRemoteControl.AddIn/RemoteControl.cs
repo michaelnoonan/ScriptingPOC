@@ -3,7 +3,7 @@ using ICSharpCode.SharpDevelop.Gui;
 using ICSharpCode.SharpDevelop.Project;
 using SharpDevelopRemoteControl.Contracts;
 
-namespace SharpDevelopRemoteControl
+namespace SharpDevelopRemoteControl.AddIn
 {
     public class RemoteControl : IRemoteControl
     {

@@ -5,26 +5,26 @@ using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Development
 {
-    public class EventListenerHost : IDisposable
+    public class HostApplicationServiceHost : IDisposable
     {
-        public static readonly EventListenerHost Instance = new EventListenerHost();
+        public static readonly HostApplicationServiceHost Instance = new HostApplicationServiceHost();
 
         private const string BaseUri = "net.pipe://localhost/HostApplication";
-        public string ListenUri { get { return BaseUri + "/EventListener/" + _processId; } }
+        public string ListenUri { get { return BaseUri + "/HostApplicationService/" + _processId; } }
 
         private readonly ServiceHost _serviceHost;
         private readonly int _processId;
 
-        public EventListenerHost()
+        public HostApplicationServiceHost()
         {
             _processId = Process.GetCurrentProcess().Id;
-            _serviceHost = new ServiceHost(typeof(EventListener));
+            _serviceHost = new ServiceHost(typeof(HostApplicationService));
         }
 
         public void StartListening()
         {
             _serviceHost.AddServiceEndpoint(
-                typeof(IDevelopmentEnvironmentEventListener),
+                typeof(IHostApplicationService),
                 new NetNamedPipeBinding(),
                 new Uri(ListenUri));
 

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCoolApp", "MyCoolApp\MyCoolApp.csproj", "{5F369295-1E1C-4198-9A7F-89E5D07CB32E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpDevelopRemoteControl", "SharpDevelopRemoteControl\SharpDevelopRemoteControl.csproj", "{CB365869-4138-4ED0-9B4E-3E595A4B7634}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpDevelopRemoteControl.AddIn", "SharpDevelopRemoteControl.AddIn\SharpDevelopRemoteControl.AddIn.csproj", "{CB365869-4138-4ED0-9B4E-3E595A4B7634}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpDevelopRemoteControl.Contracts", "SharpDevelopRemoteControl.Contracts\SharpDevelopRemoteControl.Contracts.csproj", "{73C412E7-F255-497A-8732-E44355C567CE}"
 EndProject

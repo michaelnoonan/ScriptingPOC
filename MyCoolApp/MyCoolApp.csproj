@@ -70,13 +70,14 @@
   <ItemGroup>
     <Compile Include="Caliburn.Micro\EventAggregator.cs" />
     <Compile Include="Caliburn.Micro\ExtensionMethods.cs" />
-    <Compile Include="Development\EventListenerHost.cs" />
-    <Compile Include="Development\EventListener.cs" />
+    <Compile Include="Development\HostApplicationServiceHost.cs" />
+    <Compile Include="Development\HostApplicationService.cs" />
     <Compile Include="Development\SharpDevelopAdapter.cs" />
     <Compile Include="Events\DevelopmentEnvironment\RemoteControlShutDown.cs" />
     <Compile Include="Events\DevelopmentEnvironment\RemoteControlStarted.cs" />
     <Compile Include="Events\ProjectClosed.cs" />
     <Compile Include="Events\ProjectLoaded.cs" />
+    <Compile Include="Events\Scripting\ScriptExecutionCompleted.cs" />
     <Compile Include="Model\Project.cs" />
     <Compile Include="Model\RecordedAction.cs" />
     <Compile Include="ProjectManager.cs" />

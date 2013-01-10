@@ -1,13 +1,13 @@
 ﻿using ICSharpCode.Core;
 
-namespace SharpDevelopRemoteControl
+namespace SharpDevelopRemoteControl.AddIn
 {
     public class AutoStartCommand : AbstractCommand
     {
         public override void Run()
         {
             CommandListener.Instance.Start();
-            EventPublisher.Instance.Start();
+            HostApplicationAdapter.Instance.Start();
         }
     }
 }

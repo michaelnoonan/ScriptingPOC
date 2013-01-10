@@ -3,12 +3,15 @@
 namespace SharpDevelopRemoteControl.Contracts
 {
     [ServiceContract]
-    public interface IDevelopmentEnvironmentEventListener
+    public interface IHostApplicationService
     {
         [OperationContract(IsOneWay = true)]
         void RemoteControlAvailable(string listenUri);
 
         [OperationContract(IsOneWay = true)]
-        void ShuttingDown();
+        void DevelopmentEnvironmentShuttingDown();
+
+        [OperationContract]
+        ScriptResult ExecuteFileAsScript(string scriptFilePath);
     }
 }

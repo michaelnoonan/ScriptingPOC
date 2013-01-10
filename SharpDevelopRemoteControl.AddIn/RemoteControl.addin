@@ -1,0 +1,26 @@
+﻿<AddIn name        = "Remote Control"
+       author      = "Michael Noonan"
+       description = "Enables another application to control SharpDevelop remotely"
+       addInManagerHidden = "preinstalled">
+	
+	<Manifest>
+		<Identity name = "RemoteControl"/>
+	</Manifest>
+	
+	<Runtime>
+		<Import assembly = "SharpDevelopRemoteControl.AddIn.dll"/>
+	</Runtime>
+	
+	<Path name = "/Workspace/Autostart">
+		<Class id    = "RemoteControl"
+			      class = "SharpDevelopRemoteControl.AddIn.AutoStartCommand"/>
+	</Path>
+
+  <Path name = "/SharpDevelop/Workbench/ToolBar/Standard">
+    <ToolbarItem id = "ScriptingSeparator" type = "Separator" />
+    <ToolbarItem id      = "RunCurrentScript"
+		             icon    = "Icons.16x16.RunProgramIcon"
+		             tooltip = "Run Current Script"
+		             class   = "SharpDevelopRemoteControl.AddIn.Scripting.RunCurrentScriptCommand"/>
+  </Path>
+</AddIn>

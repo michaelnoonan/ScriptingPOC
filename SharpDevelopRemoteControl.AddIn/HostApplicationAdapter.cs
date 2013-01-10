@@ -5,15 +5,15 @@ using ICSharpCode.SharpDevelop;
 using ICSharpCode.SharpDevelop.Gui;
 using SharpDevelopRemoteControl.Contracts;
 
-namespace SharpDevelopRemoteControl
+namespace SharpDevelopRemoteControl.AddIn
 {
-    public class EventPublisher : IDisposable
+    public class HostApplicationAdapter : IDisposable
     {
-        public static readonly EventPublisher Instance = new EventPublisher();
-        private readonly ChannelFactory<IDevelopmentEnvironmentEventListener> _channelFactory;
+        public static readonly HostApplicationAdapter Instance = new HostApplicationAdapter();
+        private readonly ChannelFactory<IHostApplicationService> _channelFactory;
         private readonly string _hostApplicationListenUri;
 
-        public EventPublisher()
+        public HostApplicationAdapter()
         {
             foreach (var arg in SharpDevelopMain.CommandLineArgs)
             {
@@ -29,12 +29,12 @@ namespace SharpDevelopRemoteControl
 
             if (_hostApplicationListenUri == null)
             {
-                LoggingService.Warn("The HostApplicationListenUri was not specified - not starting the EventPublisher.");
+                LoggingService.Warn("The HostApplicationListenUri was not specified - not starting the HostApplicationAdapter.");
                 return;
             }
 
             _channelFactory =
-                new ChannelFactory<IDevelopmentEnvironmentEventListener>(
+                new ChannelFactory<IHostApplicationService>(
                     new NetNamedPipeBinding());
         }
 
@@ -64,7 +64,24 @@ namespace SharpDevelopRemoteControl
             }
         }
 
-        private void ExecuteOperation(Action<IDevelopmentEnvironmentEventListener> operation)
+        private TResult ExecuteOperation<TResult>(Func<IHostApplicationService, TResult> operation)
+        {
+            if (IsEnabled == false) return default(TResult);
+
+            var serviceClient = _channelFactory.CreateChannel(new EndpointAddress(_hostApplicationListenUri));
+
+            try
+            {
+                return operation(serviceClient);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.Error("Failed to execute operation on RemoteControlHostService", ex);
+                throw;
+            }
+        }
+
+        private void ExecuteOperation(Action<IHostApplicationService> operation)
         {
             if (IsEnabled == false) return;
 
@@ -91,7 +108,12 @@ namespace SharpDevelopRemoteControl
 
         private void AnnounceRemoteControlInterfaceShuttingDown(object sender, EventArgs e)
         {
-            ExecuteOperation(c => c.ShuttingDown());
+            ExecuteOperation(c => c.DevelopmentEnvironmentShuttingDown());
+        }
+
+        public ScriptResult ExecuteFileAsScript(string scriptFilePath)
+        {
+            return ExecuteOperation(c => c.ExecuteFileAsScript(scriptFilePath));
         }
     }
 }

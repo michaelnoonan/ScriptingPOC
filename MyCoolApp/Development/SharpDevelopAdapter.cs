@@ -54,7 +54,7 @@ namespace MyCoolApp.Development
             args.Add(
                 string.Format(
                     Constant.HostApplicationListenUriParameterFormat,
-                    EventListenerHost.Instance.ListenUri));
+                    HostApplicationServiceHost.Instance.ListenUri));
 
             return string.Join(" ", args);
         }
