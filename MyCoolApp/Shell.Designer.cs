@@ -133,6 +133,7 @@
             this.runScriptToolStripMenuItem.Name = "runScriptToolStripMenuItem";
             this.runScriptToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             this.runScriptToolStripMenuItem.Text = "Run Script";
+            this.runScriptToolStripMenuItem.Click += new System.EventHandler(this.runScriptToolStripMenuItem_Click);
             // 
             // ToolBar
             // 
@@ -211,7 +212,7 @@
             this.ScriptTextBox.Name = "ScriptTextBox";
             this.ScriptTextBox.Size = new System.Drawing.Size(618, 96);
             this.ScriptTextBox.TabIndex = 6;
-            this.ScriptTextBox.Text = "Project.RecordedActions.First(x => x.Description.Contains(\"second\")).Description";
+            this.ScriptTextBox.Text = "RecordedActions.First(x => x.Description.Contains(\"second\")).Description";
             // 
             // OutputTextBox
             // 

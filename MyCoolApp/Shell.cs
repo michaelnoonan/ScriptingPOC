@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,10 +7,7 @@ using Caliburn.Micro;
 using MyCoolApp.Development;
 using MyCoolApp.Events;
 using MyCoolApp.Events.DevelopmentEnvironment;
-using MyCoolApp.Model;
 using MyCoolApp.Scripting;
-using Roslyn.Scripting;
-using Roslyn.Scripting.CSharp;
 
 namespace MyCoolApp
 {
@@ -84,18 +79,20 @@ namespace MyCoolApp
 
         public new void Handle(ProjectLoaded message)
         {
-            RefreshRecordedActionsList(message.LoadedProject.RecordedActions);
+            RefreshRecordedActionsList();
             Text = string.Format("{0} - {1}", message.LoadedProject.Name,
                                  message.LoadedProject.ProjectFilePath);
             StatusLabel.Text = string.Format("Project opened: {0}", message.LoadedProject.ProjectFilePath);
             Invoke(new Action(EvaluateCommands));
         }
 
-        private void RefreshRecordedActionsList(IEnumerable<RecordedAction> recordedActions)
+        private void RefreshRecordedActionsList()
         {
+            RecordedActionsListView.SuspendLayout();
             RecordedActionsListView.Items.Clear();
             RecordedActionsListView.DisplayMember = "Description";
-            RecordedActionsListView.Items.AddRange(recordedActions.ToArray());
+            RecordedActionsListView.Items.AddRange(ProjectManager.Instance.Project.RecordedActions.ToArray());
+            RecordedActionsListView.ResumeLayout(true);
         }
 
         public new void Handle(ProjectClosed message)
@@ -127,17 +124,17 @@ namespace MyCoolApp
 
         private void ExecuteButton_Click(object sender, EventArgs e)
         {
-            ExecuteScript();
+            ExecuteScript(ScriptTextBox.Text);
         }
 
-        private void ExecuteScript()
+        private void ExecuteScript(string scriptText)
         {
             if (ProjectManager.Instance.IsProjectLoaded == false)
                 return;
 
             StatusLabel.Text = "Executing script...";
             var executor = new ScriptExecutor(ProjectManager.Instance.Project);
-            var task = executor.ExecuteScriptAsync(ScriptTextBox.Text);
+            var task = executor.ExecuteScriptAsync(scriptText);
             task.ContinueWith(HandleResultOfExecution);
         }
 
@@ -158,7 +155,7 @@ namespace MyCoolApp
                                {
                                    OutputTextBox.Text = task.Result;
                                }
-                               RefreshRecordedActionsList(ProjectManager.Instance.Project.RecordedActions);
+                               RefreshRecordedActionsList();
                            }));
         }
 
@@ -195,11 +192,21 @@ namespace MyCoolApp
             
             if (keyData == Keys.F5)
             {
-                ExecuteScript();
+                ExecuteScript(ScriptTextBox.Text);
                 return false;
             }
 
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void runScriptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var ofd = new OpenFileDialog();
+            var result = ofd.ShowDialog(this);
+            if (result == DialogResult.OK)
+            {
+                ExecuteScript(File.ReadAllText(ofd.FileName));
+            }
         }
     }
 }

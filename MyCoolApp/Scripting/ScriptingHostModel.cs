@@ -1,4 +1,5 @@
-﻿using MyCoolApp.Model;
+﻿using System.Collections.Generic;
+using MyCoolApp.Model;
 
 namespace MyCoolApp.Scripting
 {
@@ -7,11 +8,18 @@ namespace MyCoolApp.Scripting
     /// </summary>
     public class ScriptingHostModel
     {
+        private readonly Project _project;
+
         public ScriptingHostModel(Project project)
         {
-            Project = project;
+            _project = project;
         }
 
-        public Project Project { get; private set; }
+        public IEnumerable<RecordedAction> RecordedActions { get { return _project.RecordedActions; } }
+
+        public void AddRecordedAction(string description)
+        {
+            _project.RecordedActions.Add(new RecordedAction(description));
+        }
     }
 }
