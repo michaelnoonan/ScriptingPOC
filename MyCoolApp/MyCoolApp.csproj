@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BindableBase.cs" />
     <Compile Include="Caliburn.Micro\EventAggregator.cs" />
     <Compile Include="Caliburn.Micro\ExtensionMethods.cs" />
     <Compile Include="Development\HostApplicationServiceHost.cs" />
@@ -57,8 +58,9 @@
     <Compile Include="Events\ProjectClosed.cs" />
     <Compile Include="Events\ProjectLoaded.cs" />
     <Compile Include="Events\Scripting\ScriptExecutionCompleted.cs" />
+    <Compile Include="Model\IDirty.cs" />
     <Compile Include="Model\Project.cs" />
-    <Compile Include="Model\RecordedAction.cs" />
+    <Compile Include="Model\PlannedActivityViewModel.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="Scripting\ScriptExecutor.cs" />
     <Compile Include="Scripting\ScriptingHostModel.cs" />
@@ -87,6 +89,7 @@
     <None Include="app.config" />
     <None Include="CopySharpDevelop.targets" />
     <None Include="packages.config" />
+    <None Include="Properties\DataSources\MyCoolApp.Model.PlannedActivityViewModel.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -156,6 +159,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\disconnect.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\clock.ico" />
+    <Content Include="Images\clock.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildProjectDirectory)\CopySharpDevelop.targets" />

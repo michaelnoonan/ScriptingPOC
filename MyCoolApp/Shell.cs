@@ -67,25 +67,16 @@ namespace MyCoolApp
 
         public new void Handle(ProjectLoaded message)
         {
-            RefreshRecordedActionsList();
+            plannedActivitiesBindingSource.DataSource = message.LoadedProject.PlannedActivities;
             Text = string.Format("{0} - {1}", message.LoadedProject.Name,
                                  message.LoadedProject.ProjectFilePath);
             StatusLabel.Text = string.Format("Project opened: {0}", message.LoadedProject.ProjectFilePath);
             Invoke(new Action(EvaluateCommands));
         }
 
-        private void RefreshRecordedActionsList()
-        {
-            RecordedActionsListView.SuspendLayout();
-            RecordedActionsListView.Items.Clear();
-            RecordedActionsListView.DisplayMember = "Description";
-            RecordedActionsListView.Items.AddRange(ProjectManager.Instance.Project.RecordedActions.ToArray());
-            RecordedActionsListView.ResumeLayout(true);
-        }
-
         public new void Handle(ProjectClosed message)
         {
-            RecordedActionsListView.Items.Clear();
+            plannedActivitiesBindingSource.Clear();
             Text = DefaultApplicationTitle;
             StatusLabel.Text = string.Format("Project closed: {0}", message.ClosedProject.ProjectFilePath);
             Invoke(new Action(EvaluateCommands));
@@ -132,7 +123,6 @@ namespace MyCoolApp
                        () =>
                        {
                            StatusLabel.Text = "Execution complete in " + message.Result.ElapsedTime.ToString();
-                           RefreshRecordedActionsList();
                        }));
         }
 

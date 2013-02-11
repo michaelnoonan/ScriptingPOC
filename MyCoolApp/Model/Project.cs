@@ -9,7 +9,7 @@ namespace MyCoolApp.Model
     {
         public Project()
         {
-            RecordedActions = new List<RecordedAction>();
+            PlannedActivities = new List<PlannedActivityViewModel>();
         }
 
         public void LoadProjectFromFile(string projectFilePathToLoad)
@@ -29,7 +29,7 @@ namespace MyCoolApp.Model
         private void LoadDataFromFile(string projectFilePath)
         {
             var lines = File.ReadLines(projectFilePath);
-            RecordedActions.AddRange(lines.Select(l => new RecordedAction(l)));
+            PlannedActivities.AddRange(lines.Select(l => new PlannedActivityViewModel(l)));
         }
 
         public bool IsLoaded { get; private set; }
@@ -38,11 +38,11 @@ namespace MyCoolApp.Model
         public string ProjectFilePath { get; private set; }
         public string ScriptingFolder { get; private set; }
         public string ScriptingProjectFilePath { get; private set; }
-        public List<RecordedAction> RecordedActions { get; private set; }
+        public List<PlannedActivityViewModel> PlannedActivities { get; private set; }
 
-        public void AddRecordedAction(string description)
+        public void AddPlannedActivity(string description)
         {
-            RecordedActions.Add(new RecordedAction(description));
+            PlannedActivities.Add(new PlannedActivityViewModel(description));
         }
     }
 }

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Shell));
             this.MenuBar = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,11 +48,16 @@
             this.statusConnectedToIDE = new System.Windows.Forms.ToolStripSplitButton();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.RecordedActionsListView = new System.Windows.Forms.CheckedListBox();
             this.outputWindow = new System.Windows.Forms.RichTextBox();
+            this.plannedActivitiesGridView = new System.Windows.Forms.DataGridView();
+            this.plannedActivitiesBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.descriptionDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.isDirtyDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.MenuBar.SuspendLayout();
             this.ToolBar.SuspendLayout();
             this.StatusBar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // MenuBar
@@ -211,15 +217,6 @@
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
-            // RecordedActionsListView
-            // 
-            this.RecordedActionsListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.RecordedActionsListView.FormattingEnabled = true;
-            this.RecordedActionsListView.Location = new System.Drawing.Point(0, 49);
-            this.RecordedActionsListView.Name = "RecordedActionsListView";
-            this.RecordedActionsListView.Size = new System.Drawing.Size(618, 361);
-            this.RecordedActionsListView.TabIndex = 5;
-            // 
             // outputWindow
             // 
             this.outputWindow.BackColor = System.Drawing.Color.Black;
@@ -234,13 +231,48 @@
             this.outputWindow.Text = "";
             this.outputWindow.WordWrap = false;
             // 
+            // plannedActivitiesGridView
+            // 
+            this.plannedActivitiesGridView.AutoGenerateColumns = false;
+            this.plannedActivitiesGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.plannedActivitiesGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.descriptionDataGridViewTextBoxColumn,
+            this.isDirtyDataGridViewCheckBoxColumn});
+            this.plannedActivitiesGridView.DataSource = this.plannedActivitiesBindingSource;
+            this.plannedActivitiesGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.plannedActivitiesGridView.Location = new System.Drawing.Point(0, 49);
+            this.plannedActivitiesGridView.Name = "plannedActivitiesGridView";
+            this.plannedActivitiesGridView.Size = new System.Drawing.Size(618, 265);
+            this.plannedActivitiesGridView.TabIndex = 7;
+            // 
+            // plannedActivitiesBindingSource
+            // 
+            this.plannedActivitiesBindingSource.AllowNew = true;
+            this.plannedActivitiesBindingSource.DataSource = typeof(MyCoolApp.Model.PlannedActivityViewModel);
+            // 
+            // descriptionDataGridViewTextBoxColumn
+            // 
+            this.descriptionDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.descriptionDataGridViewTextBoxColumn.DataPropertyName = "Description";
+            this.descriptionDataGridViewTextBoxColumn.HeaderText = "Description";
+            this.descriptionDataGridViewTextBoxColumn.Name = "descriptionDataGridViewTextBoxColumn";
+            // 
+            // isDirtyDataGridViewCheckBoxColumn
+            // 
+            this.isDirtyDataGridViewCheckBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.isDirtyDataGridViewCheckBoxColumn.DataPropertyName = "IsDirty";
+            this.isDirtyDataGridViewCheckBoxColumn.HeaderText = "IsDirty";
+            this.isDirtyDataGridViewCheckBoxColumn.Name = "isDirtyDataGridViewCheckBoxColumn";
+            this.isDirtyDataGridViewCheckBoxColumn.ReadOnly = true;
+            this.isDirtyDataGridViewCheckBoxColumn.Width = 42;
+            // 
             // Shell
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(618, 432);
+            this.Controls.Add(this.plannedActivitiesGridView);
             this.Controls.Add(this.outputWindow);
-            this.Controls.Add(this.RecordedActionsListView);
             this.Controls.Add(this.ToolBar);
             this.Controls.Add(this.MenuBar);
             this.Controls.Add(this.StatusBar);
@@ -255,6 +287,8 @@
             this.ToolBar.PerformLayout();
             this.StatusBar.ResumeLayout(false);
             this.StatusBar.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -273,7 +307,6 @@
         private System.Windows.Forms.ToolStripMenuItem openProjectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeProjectToolStripMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
-        private System.Windows.Forms.CheckedListBox RecordedActionsListView;
         private System.Windows.Forms.ToolStripButton toggleOutputWindowButton;
         private System.Windows.Forms.ToolStripMenuItem scheduleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recalculateToolStripMenuItem;
@@ -282,6 +315,10 @@
         private System.Windows.Forms.ToolStripDropDownButton statusNotConnectedToIDE;
         private System.Windows.Forms.ToolStripSplitButton statusConnectedToIDE;
         private System.Windows.Forms.RichTextBox outputWindow;
+        private System.Windows.Forms.BindingSource plannedActivitiesBindingSource;
+        private System.Windows.Forms.DataGridView plannedActivitiesGridView;
+        private System.Windows.Forms.DataGridViewTextBoxColumn descriptionDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn isDirtyDataGridViewCheckBoxColumn;
 
     }
 }

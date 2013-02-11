@@ -15,11 +15,11 @@ namespace MyCoolApp.Scripting
             _project = project;
         }
 
-        public IEnumerable<RecordedAction> RecordedActions { get { return _project.RecordedActions; } }
+        public IEnumerable<PlannedActivityViewModel> PlannedActivities { get { return _project.PlannedActivities; } }
 
-        public void AddRecordedAction(string description)
+        public void AddPlannedActivity(string description)
         {
-            _project.RecordedActions.Add(new RecordedAction(description));
+            _project.PlannedActivities.Add(new PlannedActivityViewModel(description));
         }
     }
 }
