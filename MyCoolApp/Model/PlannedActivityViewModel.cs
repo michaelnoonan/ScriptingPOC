@@ -1,4 +1,6 @@
-﻿namespace MyCoolApp.Model
+﻿using System;
+
+namespace MyCoolApp.Model
 {
     public class PlannedActivityViewModel : BindableBase
     {
@@ -7,9 +9,17 @@
             
         }
 
-        public PlannedActivityViewModel(string description)
+        public PlannedActivityViewModel(DateTime plannedFor, string description)
         {
+            _plannedFor = plannedFor;
             _description = description;
+        }
+
+        private DateTime _plannedFor;
+        public DateTime PlannedFor
+        {
+            get { return _plannedFor; }
+            set { SetProperty(ref _plannedFor, value); }
         }
 
         private string _description;

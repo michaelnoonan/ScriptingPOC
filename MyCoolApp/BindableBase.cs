@@ -1,20 +1,39 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using MyCoolApp.Model;
 
 namespace MyCoolApp
 {
     /// <summary>
     /// Implementation of <see cref="INotifyPropertyChanged"/> to simplify models.
     /// </summary>
-    public abstract class BindableBase : INotifyPropertyChanged
+    public abstract class BindableBase : INotifyPropertyChanged, IDirty
     {
+        private bool _isDirty;
+
         /// <summary>
         /// Multicast event for property change notifications.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public bool IsDirty { get; private set; }
+        public bool IsDirty
+        {
+            get { return _isDirty; }
+            private set
+            {
+                if (_isDirty != value)
+                {
+                    _isDirty = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public void MarkAsClean()
+        {
+            IsDirty = false;
+        }
 
         /// <summary>
         /// Checks if a property already matches a desired value.  Sets the property and

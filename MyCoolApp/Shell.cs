@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using Caliburn.Micro;
 using MyCoolApp.Development;
 using MyCoolApp.Events;
 using MyCoolApp.Events.DevelopmentEnvironment;
+using MyCoolApp.Events.Diagnostics;
 using MyCoolApp.Events.Scripting;
 using MyCoolApp.Scripting;
 
@@ -16,7 +18,9 @@ namespace MyCoolApp
         IHandle<ProjectClosed>,
         IHandle<RemoteControlStarted>,
         IHandle<RemoteControlShutDown>,
-        IHandle<ScriptExecutionCompleted>
+        IHandle<ScriptExecutionCompleted>,
+        IHandle<LogInfoEvent>,
+        IHandle<LogErrorEvent>
         
     {
         private const string DefaultApplicationTitle = "Host Application";
@@ -31,14 +35,12 @@ namespace MyCoolApp
 
         private void newProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var sfd = new SaveFileDialog();
-            sfd.FileName = "MyProject1.proj";
-            var result = sfd.ShowDialog(this);
+            var fbd = new FolderBrowserDialog();
+            fbd.RootFolder = Environment.SpecialFolder.MyDocuments;
+            var result = fbd.ShowDialog(this);
             if (result == DialogResult.OK)
             {
-                File.CreateText(sfd.FileName).Close();
-                Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(sfd.FileName), "Scripting"));
-                ProjectManager.Instance.LoadProject(sfd.FileName);
+                ProjectManager.Instance.CreateNewProject(fbd.SelectedPath);
             }
         }
 
@@ -57,12 +59,14 @@ namespace MyCoolApp
             SharpDevelopAdapter.Instance.LoadScriptingProject(ProjectManager.Instance.Project.ScriptingProjectFilePath);
         }
 
+        private void saveProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ProjectManager.Instance.SaveProject();
+        }
+
         private void closeProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ProjectManager.Instance.IsProjectLoaded)
-            {
-                ProjectManager.Instance.CloseProject();
-            }
+            ProjectManager.Instance.CloseProject();
         }
 
         public new void Handle(ProjectLoaded message)
@@ -161,6 +165,21 @@ namespace MyCoolApp
         {
             toggleOutputWindowButton.Checked = !toggleOutputWindowButton.Checked;
             outputWindow.Visible = toggleOutputWindowButton.Checked;
+        }
+
+        public void Handle(LogInfoEvent message)
+        {
+            outputWindow.AppendText(message.Message + Environment.NewLine);
+        }
+
+        public void Handle(LogErrorEvent message)
+        {
+            var before = outputWindow.TextLength;
+            outputWindow.AppendText(message.Message + Environment.NewLine);
+            outputWindow.Select(before, outputWindow.TextLength);
+            outputWindow.SelectionColor = Color.Red;
+            outputWindow.Select(outputWindow.TextLength, 0);
+            outputWindow.ScrollToCaret();
         }
     }
 }

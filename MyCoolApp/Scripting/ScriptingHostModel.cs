@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MyCoolApp.Model;
 
 namespace MyCoolApp.Scripting
@@ -17,9 +18,9 @@ namespace MyCoolApp.Scripting
 
         public IEnumerable<PlannedActivityViewModel> PlannedActivities { get { return _project.PlannedActivities; } }
 
-        public void AddPlannedActivity(string description)
+        public void AddPlannedActivity(DateTime plannedFor, string description)
         {
-            _project.PlannedActivities.Add(new PlannedActivityViewModel(description));
+            _project.PlannedActivities.Add(new PlannedActivityViewModel(plannedFor, description));
         }
     }
 }

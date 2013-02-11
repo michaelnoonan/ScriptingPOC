@@ -37,6 +37,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -55,12 +56,19 @@
     <Compile Include="Development\SharpDevelopAdapter.cs" />
     <Compile Include="Events\DevelopmentEnvironment\RemoteControlShutDown.cs" />
     <Compile Include="Events\DevelopmentEnvironment\RemoteControlStarted.cs" />
+    <Compile Include="Events\Diagnostics\LogErrorEvent.cs" />
+    <Compile Include="Events\Diagnostics\LogInfoEvent.cs" />
     <Compile Include="Events\ProjectClosed.cs" />
     <Compile Include="Events\ProjectLoaded.cs" />
     <Compile Include="Events\Scripting\ScriptExecutionCompleted.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Model\IDirty.cs" />
     <Compile Include="Model\Project.cs" />
     <Compile Include="Model\PlannedActivityViewModel.cs" />
+    <Compile Include="Persistence\PlannedActivity.cs" />
+    <Compile Include="Persistence\ProjectData.cs" />
+    <Compile Include="Persistence\ProjectLoader.cs" />
+    <Compile Include="Persistence\ProjectSaver.cs" />
     <Compile Include="ProjectManager.cs" />
     <Compile Include="Scripting\ScriptExecutor.cs" />
     <Compile Include="Scripting\ScriptingHostModel.cs" />
@@ -163,6 +171,7 @@
   <ItemGroup>
     <Content Include="Images\clock.ico" />
     <Content Include="Images\clock.png" />
+    <None Include="Images\disk.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildProjectDirectory)\CopySharpDevelop.targets" />

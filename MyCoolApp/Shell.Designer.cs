@@ -32,27 +32,28 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Shell));
             this.MenuBar = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.closeProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scheduleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recalculateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scriptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.scriptingOpenProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.runScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.debugScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolBar = new System.Windows.Forms.ToolStrip();
-            this.toggleOutputWindowButton = new System.Windows.Forms.ToolStripButton();
             this.StatusBar = new System.Windows.Forms.StatusStrip();
-            this.statusNotConnectedToIDE = new System.Windows.Forms.ToolStripDropDownButton();
-            this.statusConnectedToIDE = new System.Windows.Forms.ToolStripSplitButton();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.outputWindow = new System.Windows.Forms.RichTextBox();
             this.plannedActivitiesGridView = new System.Windows.Forms.DataGridView();
-            this.plannedActivitiesBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.descriptionDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.isDirtyDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.plannedActivitiesBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.toggleOutputWindowButton = new System.Windows.Forms.ToolStripButton();
+            this.newProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.closeProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recalculateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scriptingOpenProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.runScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.debugScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusNotConnectedToIDE = new System.Windows.Forms.ToolStripDropDownButton();
+            this.statusConnectedToIDE = new System.Windows.Forms.ToolStripSplitButton();
             this.MenuBar.SuspendLayout();
             this.ToolBar.SuspendLayout();
             this.StatusBar.SuspendLayout();
@@ -77,34 +78,11 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newProjectToolStripMenuItem,
             this.openProjectToolStripMenuItem,
+            this.saveProjectToolStripMenuItem,
             this.closeProjectToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
-            // 
-            // newProjectToolStripMenuItem
-            // 
-            this.newProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.folder_add;
-            this.newProjectToolStripMenuItem.Name = "newProjectToolStripMenuItem";
-            this.newProjectToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.newProjectToolStripMenuItem.Text = "New Project";
-            this.newProjectToolStripMenuItem.Click += new System.EventHandler(this.newProjectToolStripMenuItem_Click);
-            // 
-            // openProjectToolStripMenuItem
-            // 
-            this.openProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.folder;
-            this.openProjectToolStripMenuItem.Name = "openProjectToolStripMenuItem";
-            this.openProjectToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.openProjectToolStripMenuItem.Text = "Open Project";
-            this.openProjectToolStripMenuItem.Click += new System.EventHandler(this.openProjectToolStripMenuItem1_Click);
-            // 
-            // closeProjectToolStripMenuItem
-            // 
-            this.closeProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.cross;
-            this.closeProjectToolStripMenuItem.Name = "closeProjectToolStripMenuItem";
-            this.closeProjectToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.closeProjectToolStripMenuItem.Text = "Close Project";
-            this.closeProjectToolStripMenuItem.Click += new System.EventHandler(this.closeProjectToolStripMenuItem_Click);
             // 
             // scheduleToolStripMenuItem
             // 
@@ -113,13 +91,6 @@
             this.scheduleToolStripMenuItem.Name = "scheduleToolStripMenuItem";
             this.scheduleToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
             this.scheduleToolStripMenuItem.Text = "Schedule";
-            // 
-            // recalculateToolStripMenuItem
-            // 
-            this.recalculateToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.arrow_refresh;
-            this.recalculateToolStripMenuItem.Name = "recalculateToolStripMenuItem";
-            this.recalculateToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-            this.recalculateToolStripMenuItem.Text = "Recalculate Now!";
             // 
             // scriptingToolStripMenuItem
             // 
@@ -131,28 +102,6 @@
             this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
             this.scriptingToolStripMenuItem.Text = "Scripting";
             // 
-            // scriptingOpenProjectToolStripMenuItem
-            // 
-            this.scriptingOpenProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script;
-            this.scriptingOpenProjectToolStripMenuItem.Name = "scriptingOpenProjectToolStripMenuItem";
-            this.scriptingOpenProjectToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-            this.scriptingOpenProjectToolStripMenuItem.Text = "Open Scripting Project";
-            this.scriptingOpenProjectToolStripMenuItem.Click += new System.EventHandler(this.openProjectToolStripMenuItem_Click);
-            // 
-            // runScriptToolStripMenuItem
-            // 
-            this.runScriptToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script_go;
-            this.runScriptToolStripMenuItem.Name = "runScriptToolStripMenuItem";
-            this.runScriptToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-            this.runScriptToolStripMenuItem.Text = "Run Script";
-            // 
-            // debugScriptToolStripMenuItem
-            // 
-            this.debugScriptToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script_error;
-            this.debugScriptToolStripMenuItem.Name = "debugScriptToolStripMenuItem";
-            this.debugScriptToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-            this.debugScriptToolStripMenuItem.Text = "Debug Script";
-            // 
             // ToolBar
             // 
             this.ToolBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -162,18 +111,6 @@
             this.ToolBar.Size = new System.Drawing.Size(618, 25);
             this.ToolBar.TabIndex = 1;
             this.ToolBar.Text = "toolStrip1";
-            // 
-            // toggleOutputWindowButton
-            // 
-            this.toggleOutputWindowButton.CheckOnClick = true;
-            this.toggleOutputWindowButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toggleOutputWindowButton.Image = ((System.Drawing.Image)(resources.GetObject("toggleOutputWindowButton.Image")));
-            this.toggleOutputWindowButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toggleOutputWindowButton.Name = "toggleOutputWindowButton";
-            this.toggleOutputWindowButton.Size = new System.Drawing.Size(23, 22);
-            this.toggleOutputWindowButton.Text = "Show/Hide output window";
-            this.toggleOutputWindowButton.ToolTipText = "Show/Hide output window (F12)";
-            this.toggleOutputWindowButton.Click += new System.EventHandler(this.toggleOutputWindowButton_Click);
             // 
             // StatusBar
             // 
@@ -187,24 +124,6 @@
             this.StatusBar.Size = new System.Drawing.Size(618, 22);
             this.StatusBar.TabIndex = 2;
             this.StatusBar.Text = "statusStrip1";
-            // 
-            // statusNotConnectedToIDE
-            // 
-            this.statusNotConnectedToIDE.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.statusNotConnectedToIDE.Image = global::MyCoolApp.Properties.Resources.disconnect;
-            this.statusNotConnectedToIDE.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.statusNotConnectedToIDE.Name = "statusNotConnectedToIDE";
-            this.statusNotConnectedToIDE.Size = new System.Drawing.Size(149, 20);
-            this.statusNotConnectedToIDE.Text = "Not connected to IDE";
-            // 
-            // statusConnectedToIDE
-            // 
-            this.statusConnectedToIDE.Image = global::MyCoolApp.Properties.Resources.connect;
-            this.statusConnectedToIDE.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.statusConnectedToIDE.Name = "statusConnectedToIDE";
-            this.statusConnectedToIDE.Size = new System.Drawing.Size(131, 20);
-            this.statusConnectedToIDE.Text = "Connected to IDE";
-            this.statusConnectedToIDE.Visible = false;
             // 
             // StatusLabel
             // 
@@ -245,11 +164,6 @@
             this.plannedActivitiesGridView.Size = new System.Drawing.Size(618, 265);
             this.plannedActivitiesGridView.TabIndex = 7;
             // 
-            // plannedActivitiesBindingSource
-            // 
-            this.plannedActivitiesBindingSource.AllowNew = true;
-            this.plannedActivitiesBindingSource.DataSource = typeof(MyCoolApp.Model.PlannedActivityViewModel);
-            // 
             // descriptionDataGridViewTextBoxColumn
             // 
             this.descriptionDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
@@ -265,6 +179,102 @@
             this.isDirtyDataGridViewCheckBoxColumn.Name = "isDirtyDataGridViewCheckBoxColumn";
             this.isDirtyDataGridViewCheckBoxColumn.ReadOnly = true;
             this.isDirtyDataGridViewCheckBoxColumn.Width = 42;
+            // 
+            // plannedActivitiesBindingSource
+            // 
+            this.plannedActivitiesBindingSource.AllowNew = true;
+            this.plannedActivitiesBindingSource.DataSource = typeof(MyCoolApp.Model.PlannedActivityViewModel);
+            // 
+            // toggleOutputWindowButton
+            // 
+            this.toggleOutputWindowButton.CheckOnClick = true;
+            this.toggleOutputWindowButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toggleOutputWindowButton.Image = ((System.Drawing.Image)(resources.GetObject("toggleOutputWindowButton.Image")));
+            this.toggleOutputWindowButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toggleOutputWindowButton.Name = "toggleOutputWindowButton";
+            this.toggleOutputWindowButton.Size = new System.Drawing.Size(23, 22);
+            this.toggleOutputWindowButton.Text = "Show/Hide output window";
+            this.toggleOutputWindowButton.ToolTipText = "Show/Hide output window (F12)";
+            this.toggleOutputWindowButton.Click += new System.EventHandler(this.toggleOutputWindowButton_Click);
+            // 
+            // newProjectToolStripMenuItem
+            // 
+            this.newProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.folder_add;
+            this.newProjectToolStripMenuItem.Name = "newProjectToolStripMenuItem";
+            this.newProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newProjectToolStripMenuItem.Text = "New Project";
+            this.newProjectToolStripMenuItem.Click += new System.EventHandler(this.newProjectToolStripMenuItem_Click);
+            // 
+            // openProjectToolStripMenuItem
+            // 
+            this.openProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.folder;
+            this.openProjectToolStripMenuItem.Name = "openProjectToolStripMenuItem";
+            this.openProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openProjectToolStripMenuItem.Text = "Open Project";
+            this.openProjectToolStripMenuItem.Click += new System.EventHandler(this.openProjectToolStripMenuItem1_Click);
+            // 
+            // saveProjectToolStripMenuItem
+            // 
+            this.saveProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.disk;
+            this.saveProjectToolStripMenuItem.Name = "saveProjectToolStripMenuItem";
+            this.saveProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveProjectToolStripMenuItem.Text = "Save Project";
+            this.saveProjectToolStripMenuItem.Click += new System.EventHandler(this.saveProjectToolStripMenuItem_Click);
+            // 
+            // closeProjectToolStripMenuItem
+            // 
+            this.closeProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.cross;
+            this.closeProjectToolStripMenuItem.Name = "closeProjectToolStripMenuItem";
+            this.closeProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.closeProjectToolStripMenuItem.Text = "Close Project";
+            this.closeProjectToolStripMenuItem.Click += new System.EventHandler(this.closeProjectToolStripMenuItem_Click);
+            // 
+            // recalculateToolStripMenuItem
+            // 
+            this.recalculateToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.arrow_refresh;
+            this.recalculateToolStripMenuItem.Name = "recalculateToolStripMenuItem";
+            this.recalculateToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.recalculateToolStripMenuItem.Text = "Recalculate Now!";
+            // 
+            // scriptingOpenProjectToolStripMenuItem
+            // 
+            this.scriptingOpenProjectToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script;
+            this.scriptingOpenProjectToolStripMenuItem.Name = "scriptingOpenProjectToolStripMenuItem";
+            this.scriptingOpenProjectToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.scriptingOpenProjectToolStripMenuItem.Text = "Open Scripting Project";
+            this.scriptingOpenProjectToolStripMenuItem.Click += new System.EventHandler(this.openProjectToolStripMenuItem_Click);
+            // 
+            // runScriptToolStripMenuItem
+            // 
+            this.runScriptToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script_go;
+            this.runScriptToolStripMenuItem.Name = "runScriptToolStripMenuItem";
+            this.runScriptToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.runScriptToolStripMenuItem.Text = "Run Script";
+            // 
+            // debugScriptToolStripMenuItem
+            // 
+            this.debugScriptToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script_error;
+            this.debugScriptToolStripMenuItem.Name = "debugScriptToolStripMenuItem";
+            this.debugScriptToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.debugScriptToolStripMenuItem.Text = "Debug Script";
+            // 
+            // statusNotConnectedToIDE
+            // 
+            this.statusNotConnectedToIDE.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.statusNotConnectedToIDE.Image = global::MyCoolApp.Properties.Resources.disconnect;
+            this.statusNotConnectedToIDE.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.statusNotConnectedToIDE.Name = "statusNotConnectedToIDE";
+            this.statusNotConnectedToIDE.Size = new System.Drawing.Size(149, 20);
+            this.statusNotConnectedToIDE.Text = "Not connected to IDE";
+            // 
+            // statusConnectedToIDE
+            // 
+            this.statusConnectedToIDE.Image = global::MyCoolApp.Properties.Resources.connect;
+            this.statusConnectedToIDE.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.statusConnectedToIDE.Name = "statusConnectedToIDE";
+            this.statusConnectedToIDE.Size = new System.Drawing.Size(131, 20);
+            this.statusConnectedToIDE.Text = "Connected to IDE";
+            this.statusConnectedToIDE.Visible = false;
             // 
             // Shell
             // 
@@ -319,6 +329,7 @@
         private System.Windows.Forms.DataGridView plannedActivitiesGridView;
         private System.Windows.Forms.DataGridViewTextBoxColumn descriptionDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewCheckBoxColumn isDirtyDataGridViewCheckBoxColumn;
+        private System.Windows.Forms.ToolStripMenuItem saveProjectToolStripMenuItem;
 
     }
 }
