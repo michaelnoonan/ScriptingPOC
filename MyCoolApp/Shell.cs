@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Caliburn.Micro;
 using MyCoolApp.Development;
@@ -28,13 +26,7 @@ namespace MyCoolApp
             InitializeComponent();
             Text = DefaultApplicationTitle;
             EvaluateCommands();
-            ToggleScriptingControls();
             Program.GlobalEventAggregator.Subscribe(this);
-        }
-
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
         }
 
         private void newProjectToolStripMenuItem_Click(object sender, EventArgs e)
@@ -63,12 +55,6 @@ namespace MyCoolApp
         private void openProjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SharpDevelopAdapter.Instance.LoadScriptingProject(ProjectManager.Instance.Project.ScriptingProjectFilePath);
-        }
-
-        private void startSharpDevelopToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            StatusLabel.Text = "Starting development environment...";
-            SharpDevelopAdapter.Instance.StartDevelopmentEnvironment();
         }
 
         private void closeProjectToolStripMenuItem_Click(object sender, EventArgs e)
@@ -110,6 +96,8 @@ namespace MyCoolApp
             Invoke(new Action(() =>
                                   {
                                       StatusLabel.Text = string.Format("Development environment remote control on {0}", message.ListenUri);
+                                      statusConnectedToIDE.Visible = true;
+                                      statusNotConnectedToIDE.Visible = false;
                                       EvaluateCommands();
                                   }));
         }
@@ -120,13 +108,10 @@ namespace MyCoolApp
             Invoke(new Action(() =>
                                   {
                                       StatusLabel.Text = string.Format("Development environment shut down.");
+                                      statusConnectedToIDE.Visible = false;
+                                      statusNotConnectedToIDE.Visible = true;
                                       EvaluateCommands();
                                   }));
-        }
-
-        private void ExecuteButton_Click(object sender, EventArgs e)
-        {
-            ExecuteScript(ScriptTextBox.Text);
         }
 
         private void ExecuteScript(string scriptText)
@@ -147,59 +132,45 @@ namespace MyCoolApp
                        () =>
                        {
                            StatusLabel.Text = "Execution complete in " + message.Result.ElapsedTime.ToString();
-                           OutputTextBox.Text = message.Result.ResultDescription;
                            RefreshRecordedActionsList();
                        }));
-        }
-
-        private void toggleConsoleButton_CheckedChanged(object sender, EventArgs e)
-        {
-            ToggleScriptingControls();
         }
 
         private void EvaluateCommands()
         {
             closeProjectToolStripMenuItem.Enabled = ProjectManager.Instance.IsProjectLoaded;
+            recalculateToolStripMenuItem.Enabled = ProjectManager.Instance.IsProjectLoaded;
             scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
-            startSharpDevelopToolStripMenuItem.Enabled = !SharpDevelopAdapter.Instance.IsConnectionEstablished;
             runScriptToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
-            ExecuteButton.Enabled = ProjectManager.Instance.IsProjectLoaded;
-            ScriptTextBox.Enabled = ProjectManager.Instance.IsProjectLoaded;
-            OutputTextBox.Enabled = ProjectManager.Instance.IsProjectLoaded;
-        }
-
-        private void ToggleScriptingControls()
-        {
-            ScriptTextBox.Visible = toggleConsoleButton.Checked;
-            ExecuteButton.Visible = toggleConsoleButton.Checked;
-            OutputTextBox.Visible = toggleConsoleButton.Checked;
+            debugScriptToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F12)
             {
-                toggleConsoleButton.Checked = !toggleConsoleButton.Checked;
+                ToggleOutputWindow();
                 return false;
             }
             
-            if (keyData == Keys.F5)
-            {
-                ExecuteScript(ScriptTextBox.Text);
-                return false;
-            }
+            //if (keyData == Keys.F5)
+            //{
+            //    ExecuteScript(ScriptTextBox.Text);
+            //    return false;
+            //}
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        private void runScriptToolStripMenuItem_Click(object sender, EventArgs e)
+        private void toggleOutputWindowButton_Click(object sender, EventArgs e)
         {
-            var ofd = new OpenFileDialog();
-            var result = ofd.ShowDialog(this);
-            if (result == DialogResult.OK)
-            {
-                ExecuteScript(File.ReadAllText(ofd.FileName));
-            }
+            ToggleOutputWindow();
+        }
+
+        private void ToggleOutputWindow()
+        {
+            toggleOutputWindowButton.Checked = !toggleOutputWindowButton.Checked;
+            outputWindow.Visible = toggleOutputWindowButton.Checked;
         }
     }
 }
