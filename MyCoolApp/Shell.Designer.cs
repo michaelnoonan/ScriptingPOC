@@ -195,7 +195,7 @@
             this.toggleOutputWindowButton.Size = new System.Drawing.Size(23, 22);
             this.toggleOutputWindowButton.Text = "Show/Hide output window";
             this.toggleOutputWindowButton.ToolTipText = "Show/Hide output window (F12)";
-            this.toggleOutputWindowButton.Click += new System.EventHandler(this.toggleOutputWindowButton_Click);
+            this.toggleOutputWindowButton.Click += new System.EventHandler(this.ToggleOutputWindowButtonClick);
             // 
             // newProjectToolStripMenuItem
             // 
@@ -203,7 +203,7 @@
             this.newProjectToolStripMenuItem.Name = "newProjectToolStripMenuItem";
             this.newProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newProjectToolStripMenuItem.Text = "New Project";
-            this.newProjectToolStripMenuItem.Click += new System.EventHandler(this.newProjectToolStripMenuItem_Click);
+            this.newProjectToolStripMenuItem.Click += new System.EventHandler(this.NewProjectToolStripMenuItemClick);
             // 
             // openProjectToolStripMenuItem
             // 
@@ -211,7 +211,7 @@
             this.openProjectToolStripMenuItem.Name = "openProjectToolStripMenuItem";
             this.openProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openProjectToolStripMenuItem.Text = "Open Project";
-            this.openProjectToolStripMenuItem.Click += new System.EventHandler(this.openProjectToolStripMenuItem1_Click);
+            this.openProjectToolStripMenuItem.Click += new System.EventHandler(this.OpenProjectToolStripMenuItem1Click);
             // 
             // saveProjectToolStripMenuItem
             // 
@@ -219,7 +219,7 @@
             this.saveProjectToolStripMenuItem.Name = "saveProjectToolStripMenuItem";
             this.saveProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveProjectToolStripMenuItem.Text = "Save Project";
-            this.saveProjectToolStripMenuItem.Click += new System.EventHandler(this.saveProjectToolStripMenuItem_Click);
+            this.saveProjectToolStripMenuItem.Click += new System.EventHandler(this.SaveProjectToolStripMenuItemClick);
             // 
             // closeProjectToolStripMenuItem
             // 
@@ -227,7 +227,7 @@
             this.closeProjectToolStripMenuItem.Name = "closeProjectToolStripMenuItem";
             this.closeProjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.closeProjectToolStripMenuItem.Text = "Close Project";
-            this.closeProjectToolStripMenuItem.Click += new System.EventHandler(this.closeProjectToolStripMenuItem_Click);
+            this.closeProjectToolStripMenuItem.Click += new System.EventHandler(this.CloseProjectToolStripMenuItemClick);
             // 
             // recalculateToolStripMenuItem
             // 
@@ -242,7 +242,7 @@
             this.scriptingOpenProjectToolStripMenuItem.Name = "scriptingOpenProjectToolStripMenuItem";
             this.scriptingOpenProjectToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.scriptingOpenProjectToolStripMenuItem.Text = "Open Scripting Project";
-            this.scriptingOpenProjectToolStripMenuItem.Click += new System.EventHandler(this.openProjectToolStripMenuItem_Click);
+            this.scriptingOpenProjectToolStripMenuItem.Click += new System.EventHandler(this.OpenProjectToolStripMenuItemClick);
             // 
             // runScriptToolStripMenuItem
             // 

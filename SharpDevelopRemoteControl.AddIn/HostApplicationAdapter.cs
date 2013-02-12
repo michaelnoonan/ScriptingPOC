@@ -108,7 +108,15 @@ namespace SharpDevelopRemoteControl.AddIn
 
         private void AnnounceRemoteControlInterfaceShuttingDown(object sender, EventArgs e)
         {
-            ExecuteOperation(c => c.DevelopmentEnvironmentShuttingDown());
+            try
+            {
+                ExecuteOperation(c => c.DevelopmentEnvironmentShuttingDown());
+            }
+            catch
+            {
+                // Deliberately discard any exception on shutdown
+                // It's likely the host application has gone away...
+            }
         }
 
         public ScriptResult ExecuteFileAsScript(string scriptFilePath)

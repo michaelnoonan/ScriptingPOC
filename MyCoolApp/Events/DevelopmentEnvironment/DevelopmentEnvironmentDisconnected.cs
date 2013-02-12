@@ -1,7 +1,7 @@
 ﻿namespace MyCoolApp.Events.DevelopmentEnvironment
 {
-    public class RemoteControlShutDown
+    public class DevelopmentEnvironmentDisconnected
     {
-         
+        
     }
 }

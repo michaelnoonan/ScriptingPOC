@@ -1,4 +1,5 @@
 using MyCoolApp.Events.DevelopmentEnvironment;
+using MyCoolApp.Projects;
 using MyCoolApp.Scripting;
 using SharpDevelopRemoteControl.Contracts;
 
@@ -8,12 +9,12 @@ namespace MyCoolApp.Development
     {
         public void RemoteControlAvailable(string listenUri)
         {
-            Program.GlobalEventAggregator.Publish(new RemoteControlStarted(listenUri));
+            Program.GlobalEventAggregator.Publish(new DevelopmentEnvironmentConnected(listenUri));
         }
 
         public void DevelopmentEnvironmentShuttingDown()
         {
-            Program.GlobalEventAggregator.Publish(new RemoteControlShutDown());
+            Program.GlobalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
         }
 
         public ScriptResult ExecuteFileAsScript(string scriptFilePath)

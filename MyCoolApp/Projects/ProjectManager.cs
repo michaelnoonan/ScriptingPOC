@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.IO;
 using MyCoolApp.Events;
-using MyCoolApp.Model;
 using MyCoolApp.Persistence;
 
-namespace MyCoolApp
+namespace MyCoolApp.Projects
 {
-    public class ProjectManager
+    public class ProjectManager : IProjectManager
     {
         public static readonly ProjectManager Instance = new ProjectManager(new ProjectLoader(), new ProjectSaver());
         

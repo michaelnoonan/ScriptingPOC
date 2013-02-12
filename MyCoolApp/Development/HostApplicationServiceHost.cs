@@ -5,7 +5,7 @@ using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Development
 {
-    public class HostApplicationServiceHost : IDisposable
+    public class HostApplicationServiceHost : IHostApplicationServiceHost
     {
         public static readonly HostApplicationServiceHost Instance = new HostApplicationServiceHost();
 

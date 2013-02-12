@@ -2,8 +2,9 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using MyCoolApp.Model;
 
-namespace MyCoolApp.Model
+namespace MyCoolApp.Projects
 {
     public class Project : IDirty
     {
@@ -14,7 +15,7 @@ namespace MyCoolApp.Model
             Name = Path.GetFileNameWithoutExtension(ProjectFilePath);
             ProjectFolder = Path.GetDirectoryName(ProjectFilePath);
             ScriptingFolder = Path.Combine(ProjectFolder, "Scripting");
-            ScriptingProjectFilePath = Path.Combine(ScriptingFolder, Name + ".sln");
+            ScriptingProjectFilePath = Path.Combine(ScriptingFolder, Name + ".vbproj");
         }
 
         public string Name { get; set; }

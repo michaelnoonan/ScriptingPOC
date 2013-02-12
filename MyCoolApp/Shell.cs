@@ -8,6 +8,7 @@ using MyCoolApp.Events;
 using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Events.Diagnostics;
 using MyCoolApp.Events.Scripting;
+using MyCoolApp.Projects;
 using MyCoolApp.Scripting;
 
 namespace MyCoolApp
@@ -16,8 +17,8 @@ namespace MyCoolApp
         Form,
         IHandle<ProjectLoaded>,
         IHandle<ProjectClosed>,
-        IHandle<RemoteControlStarted>,
-        IHandle<RemoteControlShutDown>,
+        IHandle<DevelopmentEnvironmentConnected>,
+        IHandle<DevelopmentEnvironmentDisconnected>,
         IHandle<ScriptExecutionCompleted>,
         IHandle<LogInfoEvent>,
         IHandle<LogErrorEvent>
@@ -25,48 +26,55 @@ namespace MyCoolApp
     {
         private const string DefaultApplicationTitle = "Host Application";
 
+        public IProjectManager ProjectManager { get; set; }
+        public SharpDevelopAdapter SharpDevelopAdapter { get; set; }
+        public Logger Logger { get; set; }
+
         public Shell()
         {
+            ProjectManager = Projects.ProjectManager.Instance;
+            SharpDevelopAdapter = SharpDevelopAdapter.Instance;
+            Logger = Logger.Instance;
+
             InitializeComponent();
             Text = DefaultApplicationTitle;
             EvaluateCommands();
             Program.GlobalEventAggregator.Subscribe(this);
         }
 
-        private void newProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        private void NewProjectToolStripMenuItemClick(object sender, EventArgs e)
         {
-            var fbd = new FolderBrowserDialog();
-            fbd.RootFolder = Environment.SpecialFolder.MyDocuments;
+            var fbd = new FolderBrowserDialog {RootFolder = Environment.SpecialFolder.MyDocuments};
             var result = fbd.ShowDialog(this);
             if (result == DialogResult.OK)
             {
-                ProjectManager.Instance.CreateNewProject(fbd.SelectedPath);
+                ProjectManager.CreateNewProject(fbd.SelectedPath);
             }
         }
 
-        private void openProjectToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void OpenProjectToolStripMenuItem1Click(object sender, EventArgs e)
         {
             var ofd = new OpenFileDialog();
             ofd.ShowDialog(this);
             if (ofd.FileName != null && File.Exists(ofd.FileName))
             {
-                ProjectManager.Instance.LoadProject(ofd.FileName);
+                ProjectManager.LoadProject(ofd.FileName);
             }
         }
 
-        private void openProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenProjectToolStripMenuItemClick(object sender, EventArgs e)
         {
-            SharpDevelopAdapter.Instance.LoadScriptingProject(ProjectManager.Instance.Project.ScriptingProjectFilePath);
+            SharpDevelopAdapter.LoadScriptingProject(ProjectManager.Project);
         }
 
-        private void saveProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveProjectToolStripMenuItemClick(object sender, EventArgs e)
         {
-            ProjectManager.Instance.SaveProject();
+            ProjectManager.SaveProject();
         }
 
-        private void closeProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CloseProjectToolStripMenuItemClick(object sender, EventArgs e)
         {
-            ProjectManager.Instance.CloseProject();
+            ProjectManager.CloseProject();
         }
 
         public new void Handle(ProjectLoaded message)
@@ -86,23 +94,23 @@ namespace MyCoolApp
             Invoke(new Action(EvaluateCommands));
         }
 
-        public new void Handle(RemoteControlStarted message)
+        public new void Handle(DevelopmentEnvironmentConnected message)
         {
             Invoke(new Action(() =>
                                   {
-                                      StatusLabel.Text = string.Format("Development environment remote control on {0}", message.ListenUri);
+                                      Logger.Info("Development environment remote control on {0}", message.ListenUri);
                                       statusConnectedToIDE.Visible = true;
                                       statusNotConnectedToIDE.Visible = false;
                                       EvaluateCommands();
                                   }));
         }
 
-        public new void Handle(RemoteControlShutDown message)
+        public new void Handle(DevelopmentEnvironmentDisconnected message)
         {
             if (IsDisposed) return;
             Invoke(new Action(() =>
                                   {
-                                      StatusLabel.Text = string.Format("Development environment shut down.");
+                                      Logger.Info("Development environment shut down.");
                                       statusConnectedToIDE.Visible = false;
                                       statusNotConnectedToIDE.Visible = true;
                                       EvaluateCommands();
@@ -111,11 +119,11 @@ namespace MyCoolApp
 
         private void ExecuteScript(string scriptText)
         {
-            if (ProjectManager.Instance.IsProjectLoaded == false)
+            if (ProjectManager.IsProjectLoaded == false)
                 return;
 
             StatusLabel.Text = "Executing script...";
-            var executor = new ScriptExecutor(ProjectManager.Instance.Project);
+            var executor = new ScriptExecutor(ProjectManager.Project);
             executor.ExecuteScriptAsync(scriptText);
         }
 
@@ -130,13 +138,31 @@ namespace MyCoolApp
                        }));
         }
 
+        public new void Handle(LogInfoEvent message)
+        {
+            outputWindow.AppendText(message.Message + Environment.NewLine);
+            outputWindow.Select(outputWindow.TextLength, 0);
+            outputWindow.ScrollToCaret();
+        }
+
+        public new void Handle(LogErrorEvent message)
+        {
+            var before = outputWindow.TextLength;
+            outputWindow.AppendText(message.Message + Environment.NewLine);
+            outputWindow.Select(before, outputWindow.TextLength);
+            outputWindow.SelectionColor = Color.Red;
+            outputWindow.Select(outputWindow.TextLength, 0);
+            outputWindow.ScrollToCaret();
+        }
+
         private void EvaluateCommands()
         {
-            closeProjectToolStripMenuItem.Enabled = ProjectManager.Instance.IsProjectLoaded;
-            recalculateToolStripMenuItem.Enabled = ProjectManager.Instance.IsProjectLoaded;
-            scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
-            runScriptToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
-            debugScriptToolStripMenuItem.Enabled = ProjectManager.Instance.HasScriptingSolution;
+            closeProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
+            recalculateToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
+            scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
+            runScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingSolution;
+            debugScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingSolution;
+            toggleOutputWindowButton.Checked = outputWindow.Visible;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -156,30 +182,15 @@ namespace MyCoolApp
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        private void toggleOutputWindowButton_Click(object sender, EventArgs e)
+        private void ToggleOutputWindowButtonClick(object sender, EventArgs e)
         {
             ToggleOutputWindow();
         }
 
         private void ToggleOutputWindow()
         {
-            toggleOutputWindowButton.Checked = !toggleOutputWindowButton.Checked;
-            outputWindow.Visible = toggleOutputWindowButton.Checked;
-        }
-
-        public void Handle(LogInfoEvent message)
-        {
-            outputWindow.AppendText(message.Message + Environment.NewLine);
-        }
-
-        public void Handle(LogErrorEvent message)
-        {
-            var before = outputWindow.TextLength;
-            outputWindow.AppendText(message.Message + Environment.NewLine);
-            outputWindow.Select(before, outputWindow.TextLength);
-            outputWindow.SelectionColor = Color.Red;
-            outputWindow.Select(outputWindow.TextLength, 0);
-            outputWindow.ScrollToCaret();
+            outputWindow.Visible = !outputWindow.Visible;
+            toggleOutputWindowButton.Checked = outputWindow.Visible;
         }
     }
 }

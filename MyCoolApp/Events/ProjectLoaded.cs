@@ -1,4 +1,4 @@
-﻿using MyCoolApp.Model;
+﻿using MyCoolApp.Projects;
 
 namespace MyCoolApp.Events
 {

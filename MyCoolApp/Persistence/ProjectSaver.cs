@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Runtime.Serialization;
-using MyCoolApp.Model;
+using MyCoolApp.Projects;
 
 namespace MyCoolApp.Persistence
 {

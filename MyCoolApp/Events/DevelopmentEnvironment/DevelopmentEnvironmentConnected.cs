@@ -1,10 +1,10 @@
 ﻿namespace MyCoolApp.Events.DevelopmentEnvironment
 {
-    public class RemoteControlStarted
+    public class DevelopmentEnvironmentConnected
     {
         public string ListenUri { get; private set; }
 
-        public RemoteControlStarted(string listenUri)
+        public DevelopmentEnvironmentConnected(string listenUri)
         {
             ListenUri = listenUri;
         }

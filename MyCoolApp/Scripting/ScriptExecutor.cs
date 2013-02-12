@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using MyCoolApp.Events.Scripting;
 using MyCoolApp.Model;
+using MyCoolApp.Projects;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Scripting

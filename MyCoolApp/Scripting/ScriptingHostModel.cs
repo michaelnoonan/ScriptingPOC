@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyCoolApp.Model;
+using MyCoolApp.Projects;
 
 namespace MyCoolApp.Scripting
 {
