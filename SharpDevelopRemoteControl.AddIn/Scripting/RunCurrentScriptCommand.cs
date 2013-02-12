@@ -63,13 +63,11 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
         {
             WorkbenchSingleton.StatusBar.SetMessage(
                 "Executing script in host application...");
-            var result = HostApplicationAdapter.Instance.ExecuteScript(ProjectService.CurrentProject.OutputAssemblyFullPath,
-                                                                       mainMethod.FullyQualifiedName);
-        }
-
-        private void BuildCompleted(BuildResults buildResults)
-        {
-            
+            var result =
+                HostApplicationAdapter.Instance.ExecuteScript(
+                    ProjectService.CurrentProject.OutputAssemblyFullPath,
+                    mainMethod.DeclaringType.FullyQualifiedName,
+                    mainMethod.Name);
         }
 
         private IClass GetBestMatchingClassFromCurrentCaretPosition(ParseInformation parseInfo, Location caretLocation)

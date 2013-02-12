@@ -1,5 +1,4 @@
-﻿using MyCoolApp.Scripting;
-using SharpDevelopRemoteControl.Contracts;
+﻿using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Events.Scripting
 {

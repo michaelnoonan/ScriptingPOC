@@ -12,6 +12,6 @@ namespace SharpDevelopRemoteControl.Contracts
         void DevelopmentEnvironmentShuttingDown();
 
         [OperationContract]
-        ScriptResult ExecuteScript(string assemblyPath, string scriptMethodPath);
+        ScriptResult ExecuteScript(string assemblyPath, string className, string methodName);
     }
 }

@@ -117,16 +117,6 @@ namespace MyCoolApp
                                   }));
         }
 
-        private void ExecuteScript(string scriptText)
-        {
-            if (ProjectManager.IsProjectLoaded == false)
-                return;
-
-            StatusLabel.Text = "Executing script...";
-            var executor = new ScriptExecutor(ProjectManager.Project);
-            executor.ExecuteScriptAsync(scriptText);
-        }
-
         public new void Handle(ScriptExecutionCompleted message)
         {
             if (IsDisposed) return;

@@ -10,7 +10,7 @@ namespace MyCoolApp.Scripting
 {
     public class ScriptExecutor
     {
-        private readonly ScriptingHostModel _hostObject;
+        private readonly Logger _logger;
         private DateTime? _startedAt;
         private DateTime? _completedAt;
 
@@ -19,21 +19,24 @@ namespace MyCoolApp.Scripting
             get { return (_startedAt.HasValue && _completedAt.HasValue) ? _completedAt.Value - _startedAt.Value : TimeSpan.Zero; }
         }
 
-        public ScriptExecutor(Project project)
+        public ScriptExecutor(Logger logger)
         {
-            _hostObject = new ScriptingHostModel(project);
+            _logger = logger;
         }
 
         public Task<ScriptResult> ExecuteScriptAsync(string methodName)
         {
-            return Task.Run(() => ExecuteScript(methodName));
+            return (Task<ScriptResult>) Task.Run(() => { throw new NotImplementedException(); });
         }
 
-        public ScriptResult ExecuteScript(string methodName)
+        public ScriptResult ExecuteScript(Project project, string assemblyPath, string scriptMethodPath)
         {
+            _logger.Info("Execute Script in {0} at path {1}", assemblyPath, scriptMethodPath);
+
             _startedAt = DateTime.Now;
             try
             {
+                var hostObject = new ScriptingHostModel(project);
                 //var resultObject = _session.Execute(methodName);
                 _completedAt = DateTime.Now;
                 var resultString = "Execution completed successfully without a return value.";
@@ -48,17 +51,6 @@ namespace MyCoolApp.Scripting
                 Program.GlobalEventAggregator.Publish(new ScriptExecutionCompleted(scriptResult));
                 return scriptResult;
             }
-        }
-
-        public ScriptResult ExecuteScriptFile(string scriptFilePath)
-        {
-            if (string.IsNullOrWhiteSpace(scriptFilePath))
-                throw new ArgumentException("The file path was not specified.");
-
-            if (File.Exists(scriptFilePath) == false)
-                throw new InvalidOperationException("The file does not exist at that path.");
-
-            return ExecuteScript(File.ReadAllText(scriptFilePath));
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using Caliburn.Micro;
 using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Projects;
@@ -9,11 +8,15 @@ namespace MyCoolApp.Development
 {
     public class HostApplicationService : IHostApplicationService
     {
-        private readonly EventAggregator _globalEventAggregator;
+        private readonly IEventAggregator _globalEventAggregator;
+        private readonly IProjectManager _projectManager;
+        private readonly IScriptingService _scriptingService;
 
         public HostApplicationService()
         {
             _globalEventAggregator = Program.GlobalEventAggregator;
+            _projectManager = ProjectManager.Instance;
+            _scriptingService = ScriptingService.Instance;
         }
 
         public void RemoteControlAvailable(string listenUri)
@@ -26,10 +29,9 @@ namespace MyCoolApp.Development
             _globalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
         }
 
-        public ScriptResult ExecuteScript(string assemblyPath, string scriptMethodPath)
+        public ScriptResult ExecuteScript(string assemblyPath, string className, string methodName)
         {
-            Logger.Instance.Info("Execute Script in {0} at path {1}", assemblyPath, scriptMethodPath);
-            return new ScriptResult(true, "Ready", TimeSpan.FromSeconds(5));
+            return _scriptingService.ExecuteScript(assemblyPath, className, methodName);
         }
     }
 }
