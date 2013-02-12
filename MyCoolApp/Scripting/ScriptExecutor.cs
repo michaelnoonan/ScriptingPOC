@@ -24,17 +24,17 @@ namespace MyCoolApp.Scripting
             _hostObject = new ScriptingHostModel(project);
         }
 
-        public Task<ScriptResult> ExecuteScriptAsync(string scriptText)
+        public Task<ScriptResult> ExecuteScriptAsync(string methodName)
         {
-            return Task.Run(() => ExecuteScript(scriptText));
+            return Task.Run(() => ExecuteScript(methodName));
         }
 
-        public ScriptResult ExecuteScript(string scriptText)
+        public ScriptResult ExecuteScript(string methodName)
         {
             _startedAt = DateTime.Now;
             try
             {
-                //var resultObject = _session.Execute(scriptText);
+                //var resultObject = _session.Execute(methodName);
                 _completedAt = DateTime.Now;
                 var resultString = "Execution completed successfully without a return value.";
                 var scriptResult = new ScriptResult(successful: true, result: resultString, elapsedTime: ElapsedTime);

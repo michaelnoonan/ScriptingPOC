@@ -9,12 +9,15 @@ namespace SharpDevelopRemoteControl.AddIn
 {
     public class HostApplicationAdapter : IDisposable
     {
-        public static readonly HostApplicationAdapter Instance = new HostApplicationAdapter();
+        public static readonly HostApplicationAdapter Instance = new HostApplicationAdapter(new CommandListener());
+
+        private readonly ICommandListener _commandListener;
         private readonly ChannelFactory<IHostApplicationService> _channelFactory;
         private readonly string _hostApplicationListenUri;
 
-        public HostApplicationAdapter()
+        public HostApplicationAdapter(ICommandListener commandListener)
         {
+            _commandListener = commandListener;
             foreach (var arg in SharpDevelopMain.CommandLineArgs)
             {
                 LoggingService.Info(arg);
@@ -102,8 +105,9 @@ namespace SharpDevelopRemoteControl.AddIn
         {
             WorkbenchSingleton.WorkbenchCreated -= AnnounceRemoteControlInterfaceIsReady;
 
-            LoggingService.InfoFormatted("Announcing remote control ready on {0}...", CommandListener.Instance.ListenUri);
-            ExecuteOperation(c => c.RemoteControlAvailable(CommandListener.Instance.ListenUri));
+            var listenUri = _commandListener.ListenUri;
+            LoggingService.InfoFormatted("Announcing remote control ready on {0}...", listenUri);
+            ExecuteOperation(c => c.RemoteControlAvailable(listenUri));
         }
 
         private void AnnounceRemoteControlInterfaceShuttingDown(object sender, EventArgs e)

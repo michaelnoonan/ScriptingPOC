@@ -1,3 +1,4 @@
+using Caliburn.Micro;
 using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Projects;
 using MyCoolApp.Scripting;
@@ -7,14 +8,21 @@ namespace MyCoolApp.Development
 {
     public class HostApplicationService : IHostApplicationService
     {
+        private readonly EventAggregator _globalEventAggregator;
+
+        public HostApplicationService()
+        {
+            _globalEventAggregator = Program.GlobalEventAggregator;
+        }
+
         public void RemoteControlAvailable(string listenUri)
         {
-            Program.GlobalEventAggregator.Publish(new DevelopmentEnvironmentConnected(listenUri));
+            _globalEventAggregator.Publish(new DevelopmentEnvironmentConnected(listenUri));
         }
 
         public void DevelopmentEnvironmentShuttingDown()
         {
-            Program.GlobalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
+            _globalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
         }
 
         public ScriptResult ExecuteFileAsScript(string scriptFilePath)

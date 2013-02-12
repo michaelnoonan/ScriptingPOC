@@ -7,7 +7,7 @@ using SharpDevelopRemoteControl.Contracts;
 
 namespace SharpDevelopRemoteControl.AddIn
 {
-    public class CommandListener : IDisposable
+    public class CommandListener : ICommandListener, IDisposable
     {
         public static readonly CommandListener Instance = new CommandListener();
         
