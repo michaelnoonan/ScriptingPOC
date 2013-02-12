@@ -123,9 +123,9 @@ namespace SharpDevelopRemoteControl.AddIn
             }
         }
 
-        public ScriptResult ExecuteFileAsScript(string scriptFilePath)
+        public ScriptResult ExecuteScript(string assemblyPath, string scriptMethodPath)
         {
-            return ExecuteOperation(c => c.ExecuteFileAsScript(scriptFilePath));
+            return ExecuteOperation(c => c.ExecuteScript(assemblyPath, scriptMethodPath));
         }
     }
 }

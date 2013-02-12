@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using ICSharpCode.AvalonEdit.AddIn;
 using ICSharpCode.Core;
 using ICSharpCode.NRefactory;
 using ICSharpCode.SharpDevelop;
 using ICSharpCode.SharpDevelop.Dom;
 using ICSharpCode.SharpDevelop.Gui;
+using ICSharpCode.SharpDevelop.Project;
 
 namespace SharpDevelopRemoteControl.AddIn.Scripting
 {
@@ -17,16 +19,57 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
 
             if (avalonEditViewContent != null)
             {
+                var currentFileName = avalonEditViewContent.PrimaryFileName;
                 var caretLocation = avalonEditViewContent.CodeEditor.ActiveTextEditorAdapter.Caret.Position;
 
                 // Parse the file
-                var parseInfo = ParserService.GetExistingParseInformation(avalonEditViewContent.PrimaryFileName) ??
-                                ParserService.ParseFile(avalonEditViewContent.PrimaryFileName);
+                var parseInfo = ParserService.GetExistingParseInformation(currentFileName) ??
+                                ParserService.ParseFile(currentFileName);
 
                 var bestMatchingClass = GetBestMatchingClassFromCurrentCaretPosition(parseInfo, caretLocation);
+                IMethod mainMethod = null;
+                if (bestMatchingClass != null)
+                {
+                    LoggingService.Info(bestMatchingClass.FullyQualifiedName);
+                    mainMethod = bestMatchingClass.Methods.FirstOrDefault(m => m.Name == "Main" && m.Parameters.Count == 0);
+                    if (mainMethod != null)
+                    {
+                        LoggingService.Info(mainMethod.FullyQualifiedName);
+                    }
+                }
 
-                LoggingService.Info(bestMatchingClass.FullyQualifiedName);
+                if (mainMethod == null)
+                {
+                    TaskService.Add(new Task(currentFileName,
+                         "Which script do you want to run? Please move the text cursor inside a Module or Class with a Subroutine called 'Main' with no parameters.",
+                         caretLocation.Column, caretLocation.Line, TaskType.Error));
+                    return;
+                }
+
+                BuildEngine.BuildInGui(
+                    ProjectService.CurrentProject,
+                    new BuildOptions(BuildTarget.Build,
+                                     r =>
+                                         {
+                                             if (r.Result == BuildResultCode.Success)
+                                             {
+                                                 ExecuteScriptInHostApplication(mainMethod);
+                                             }
+                                         }));
             }
+        }
+
+        private static void ExecuteScriptInHostApplication(IMethod mainMethod)
+        {
+            WorkbenchSingleton.StatusBar.SetMessage(
+                "Executing script in host application...");
+            var result = HostApplicationAdapter.Instance.ExecuteScript(ProjectService.CurrentProject.OutputAssemblyFullPath,
+                                                                       mainMethod.FullyQualifiedName);
+        }
+
+        private void BuildCompleted(BuildResults buildResults)
+        {
+            
         }
 
         private IClass GetBestMatchingClassFromCurrentCaretPosition(ParseInformation parseInfo, Location caretLocation)

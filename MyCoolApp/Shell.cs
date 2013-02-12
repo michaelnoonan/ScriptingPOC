@@ -140,19 +140,27 @@ namespace MyCoolApp
 
         public new void Handle(LogInfoEvent message)
         {
-            outputWindow.AppendText(message.Message + Environment.NewLine);
-            outputWindow.Select(outputWindow.TextLength, 0);
-            outputWindow.ScrollToCaret();
+            Invoke(new Action(
+                       () =>
+                           {
+                               outputWindow.AppendText(message.Message + Environment.NewLine);
+                               outputWindow.Select(outputWindow.TextLength, 0);
+                               outputWindow.ScrollToCaret();
+                           }));
         }
 
         public new void Handle(LogErrorEvent message)
         {
-            var before = outputWindow.TextLength;
-            outputWindow.AppendText(message.Message + Environment.NewLine);
-            outputWindow.Select(before, outputWindow.TextLength);
-            outputWindow.SelectionColor = Color.Red;
-            outputWindow.Select(outputWindow.TextLength, 0);
-            outputWindow.ScrollToCaret();
+            Invoke(new Action(
+                       () =>
+                           {
+                               var before = outputWindow.TextLength;
+                               outputWindow.AppendText(message.Message + Environment.NewLine);
+                               outputWindow.Select(before, outputWindow.TextLength);
+                               outputWindow.SelectionColor = Color.Red;
+                               outputWindow.Select(outputWindow.TextLength, 0);
+                               outputWindow.ScrollToCaret();
+                           }));
         }
 
         private void EvaluateCommands()

@@ -1,3 +1,4 @@
+using System;
 using Caliburn.Micro;
 using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Projects;
@@ -25,10 +26,10 @@ namespace MyCoolApp.Development
             _globalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
         }
 
-        public ScriptResult ExecuteFileAsScript(string scriptFilePath)
+        public ScriptResult ExecuteScript(string assemblyPath, string scriptMethodPath)
         {
-            var executor = new ScriptExecutor(ProjectManager.Instance.Project);
-            return executor.ExecuteScriptFile(scriptFilePath);
+            Logger.Instance.Info("Execute Script in {0} at path {1}", assemblyPath, scriptMethodPath);
+            return new ScriptResult(true, "Ready", TimeSpan.FromSeconds(5));
         }
     }
 }
