@@ -16,5 +16,10 @@ namespace MyCoolApp
         {
             Program.GlobalEventAggregator.Publish(new LogErrorEvent(string.Format(format, args) + Environment.NewLine + ex));
         }
+
+        public void Error(string format, params object[] args)
+        {
+            Program.GlobalEventAggregator.Publish(new LogErrorEvent(string.Format(format, args)));
+        }
     }
 }

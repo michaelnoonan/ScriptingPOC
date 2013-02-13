@@ -76,6 +76,11 @@ namespace MyCoolApp.Development
                     Constant.HostApplicationListenUriParameterFormat,
                     _hostApplicationServiceHost.ListenUri));
 
+            args.Add(
+                string.Format(
+                    Constant.HostApplicationProcessIdParameterFormat,
+                    Process.GetCurrentProcess().Id));
+
             return string.Join(" ", args);
         }
 

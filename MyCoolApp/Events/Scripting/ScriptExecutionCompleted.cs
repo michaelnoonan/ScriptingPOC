@@ -4,11 +4,11 @@ namespace MyCoolApp.Events.Scripting
 {
     public class ScriptExecutionCompleted
     {
-        public ScriptExecutionCompleted(ScriptResult result)
+        public ScriptExecutionCompleted(ScriptExecutionResult result)
         {
             Result = result;
         }
 
-        public ScriptResult Result { get; private set; } 
+        public ScriptExecutionResult Result { get; private set; } 
     }
 }

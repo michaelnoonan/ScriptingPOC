@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <SharpDevelopTargetPath>$(SolutionDir)\bin\SharpDevelop</SharpDevelopTargetPath>
+    <AddInTargetPath>$(SharpDevelopTargetPath)\AddIns\Runge\RemoteControl</AddInTargetPath>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <RemoteControlAddin Include="$(OutputPath)\**" />
+  </ItemGroup>
+
+  <Target Name="CopyFiles" AfterTargets="AfterBuild">
+    <Exec Command="RMDIR /S /Q $(AddInTargetPath)" />
+    <Copy SourceFiles="@(RemoteControlAddin)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\Runge\RemoteControl\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

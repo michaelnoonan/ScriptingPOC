@@ -29,9 +29,14 @@ namespace MyCoolApp.Development
             _globalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
         }
 
-        public ScriptResult ExecuteScript(string assemblyPath, string className, string methodName)
+        public ScriptExecutionResult ExecuteScript(string assemblyPath, string className, string methodName)
         {
             return _scriptingService.ExecuteScript(assemblyPath, className, methodName);
+        }
+
+        public ScriptLoadResult LoadScript(string assemblyPath, string className, string methodName)
+        {
+            return _scriptingService.LoadScript(assemblyPath, className, methodName);
         }
     }
 }

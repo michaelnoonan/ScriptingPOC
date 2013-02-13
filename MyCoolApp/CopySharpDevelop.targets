@@ -1,22 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <ItemGroup>
-    <SharpDevelopBinFiles Include="$(SolutionDir)\SharpDevelop\bin\**\*.*" />
-    <SharpDevelopDataFiles Include="$(SolutionDir)\SharpDevelop\data\**\*.*" />
-    <SharpDevelopAddInFiles Include="$(SolutionDir)\SharpDevelop\AddIns\**\*.*" />
-    <SharpDevelopDocFiles Include="$(SolutionDir)\SharpDevelop\doc\**\*.*" />
-  </ItemGroup>
-
   <PropertyGroup>
-      <SharpDevelopTargetPath>$(OutputPath)\SharpDevelop</SharpDevelopTargetPath>
+    <SharpDevelopTargetPath>$(OutputPath)\SharpDevelop</SharpDevelopTargetPath>
+    <AddInsSourceDir>$(SolutionDir)\SharpDevelop\AddIns\</AddInsSourceDir>
   </PropertyGroup>
 
-  <Target Name="CopyFiles" AfterTargets="AfterBuild">
+
+  <ItemGroup>
+    <SharpDevelopBinFiles Include="$(SolutionDir)\SharpDevelop\bin\**" />
+    <SharpDevelopDataFiles Include="$(SolutionDir)\SharpDevelop\data\**" />
+    <SharpDevelopAddInFiles Include="$(AddInsSourceDir)\*.addin" />
+    <SharpDevelopAnalysisAddIns Include="$(AddInsSourceDir)\Analysis\**" />
+    <SharpDevelopVBNetBackendBindingAddIn Include="$(AddInsSourceDir)\BackendBindings\VBNetBinding\**" />
+    <SharpDevelopCSharpBackendBindingAddIn Include="$(AddInsSourceDir)\BackendBindings\CSharpBinding\**" />
+    <SharpDevelopDebuggerAddIns Include="$(AddInsSourceDir)\Debugger\**" />
+    <SharpDevelopDisplayBindingAddIns Include="$(AddInsSourceDir)\DisplayBindings\**" />
+    <SharpDevelopMiscAddIns Include="$(AddInsSourceDir)\Misc\**" Exclude="$(AddInsSourceDir)\Misc\TextTemplating\**;$(AddInsSourceDir)\Misc\UsageDataCollector\**;$(AddInsSourceDir)\Misc\HelpViewer\**" />
+    <RemoteControlAddin Include="$(SolutionDir)\SharpDevelopRemoteControl.AddIn\bin\Debug\**" />
+    <SharpDevelopDocFiles Include="$(SolutionDir)\SharpDevelop\doc\**" />
+  </ItemGroup>
+
+  <Target Name="CopyFiles" BeforeTargets="Build">
+    <Exec Command="RMDIR /S /Q $(SharpDevelopTargetPath)" />
     <Error Condition="'@(SharpDevelopBinFiles)' == ''" Text="SharpDevelop project has not been built." />
     <Copy SourceFiles="@(SharpDevelopBinFiles)" DestinationFolder="$(SharpDevelopTargetPath)\bin\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopDataFiles)" DestinationFolder="$(SharpDevelopTargetPath)\data\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopAddInFiles)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopAnalysisAddIns)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\Analysis\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopVBNetBackendBindingAddIn)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\BackendBindings\VBNetBinding\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopCSharpBackendBindingAddIn)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\BackendBindings\CSharpBinding\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopDebuggerAddIns)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\Debugger\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopDisplayBindingAddIns)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\DisplayBindings\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopMiscAddIns)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\Misc\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(RemoteControlAddin)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\Runge\RemoteControl\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopDocFiles)" DestinationFolder="$(SharpDevelopTargetPath)\doc\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 

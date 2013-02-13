@@ -18,9 +18,9 @@
 
   <Path name = "/SharpDevelop/Workbench/ToolBar/Standard">
     <ToolbarItem id = "ScriptingSeparator" type = "Separator" />
-    <ToolbarItem id      = "RunCurrentScript"
+    <ToolbarItem id      = "DebugCurrentScript"
 		             icon    = "Icons.16x16.RunProgramIcon"
-		             tooltip = "Run Current Script"
-		             class   = "SharpDevelopRemoteControl.AddIn.Scripting.RunCurrentScriptCommand"/>
+		             tooltip = "Debug Current Script"
+		             class   = "SharpDevelopRemoteControl.AddIn.Scripting.DebugCurrentScriptCommand"/>
   </Path>
 </AddIn>

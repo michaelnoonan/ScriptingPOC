@@ -4,9 +4,9 @@ using System.Runtime.Serialization;
 namespace SharpDevelopRemoteControl.Contracts
 {
     [DataContract]
-    public class ScriptResult
+    public class ScriptExecutionResult
     {
-        public ScriptResult(bool successful, string result, TimeSpan elapsedTime)
+        public ScriptExecutionResult(bool successful, string result, TimeSpan elapsedTime)
         {
             Successful = successful;
             ResultDescription = result;

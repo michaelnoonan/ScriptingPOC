@@ -14,6 +14,12 @@ namespace SharpDevelopRemoteControl.AddIn
         private readonly ICommandListener _commandListener;
         private readonly ChannelFactory<IHostApplicationService> _channelFactory;
         private readonly string _hostApplicationListenUri;
+        private readonly int _hostApplicationProcessId;
+
+        public int HostApplicationProcessId
+        {
+            get { return _hostApplicationProcessId; }
+        }
 
         public HostApplicationAdapter(ICommandListener commandListener)
         {
@@ -27,6 +33,13 @@ namespace SharpDevelopRemoteControl.AddIn
 
                     LoggingService.InfoFormatted("The host application is listening for events on '{0}'",
                                  _hostApplicationListenUri);
+                }
+
+                if (arg.StartsWith(Constant.HostApplicationProcessIdParameterToken))
+                {
+                    _hostApplicationProcessId = int.Parse(arg.Replace(Constant.HostApplicationProcessIdParameterToken, "").Trim());
+
+                    LoggingService.InfoFormatted("The host application ProcessId is '{0}'", _hostApplicationProcessId);
                 }
             }
 
@@ -123,7 +136,12 @@ namespace SharpDevelopRemoteControl.AddIn
             }
         }
 
-        public ScriptResult ExecuteScript(string assemblyPath, string className, string methodName)
+        public ScriptLoadResult LoadScript(string assemblyPath, string className, string methodName)
+        {
+            return ExecuteOperation(c => c.LoadScript(assemblyPath, className, methodName));
+        }
+
+        public ScriptExecutionResult ExecuteScript(string assemblyPath, string className, string methodName)
         {
             return ExecuteOperation(c => c.ExecuteScript(assemblyPath, className, methodName));
         }

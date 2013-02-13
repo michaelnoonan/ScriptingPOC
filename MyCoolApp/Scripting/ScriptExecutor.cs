@@ -24,12 +24,12 @@ namespace MyCoolApp.Scripting
             _logger = logger;
         }
 
-        public Task<ScriptResult> ExecuteScriptAsync(string methodName)
+        public Task<ScriptExecutionResult> ExecuteScriptAsync(string methodName)
         {
-            return (Task<ScriptResult>) Task.Run(() => { throw new NotImplementedException(); });
+            return (Task<ScriptExecutionResult>) Task.Run(() => { throw new NotImplementedException(); });
         }
 
-        public ScriptResult ExecuteScript(Project project, string assemblyPath, string scriptMethodPath)
+        public ScriptExecutionResult ExecuteScript(Project project, string assemblyPath, string scriptMethodPath)
         {
             _logger.Info("Execute Script in {0} at path {1}", assemblyPath, scriptMethodPath);
 
@@ -40,14 +40,14 @@ namespace MyCoolApp.Scripting
                 //var resultObject = _session.Execute(methodName);
                 _completedAt = DateTime.Now;
                 var resultString = "Execution completed successfully without a return value.";
-                var scriptResult = new ScriptResult(successful: true, result: resultString, elapsedTime: ElapsedTime);
+                var scriptResult = new ScriptExecutionResult(successful: true, result: resultString, elapsedTime: ElapsedTime);
                 Program.GlobalEventAggregator.Publish(new ScriptExecutionCompleted(scriptResult));
                 return scriptResult;
             }
             catch (Exception e)
             {
                 _completedAt = DateTime.Now;
-                var scriptResult = new ScriptResult(successful: false, result: e.Message, elapsedTime: ElapsedTime);
+                var scriptResult = new ScriptExecutionResult(successful: false, result: e.Message, elapsedTime: ElapsedTime);
                 Program.GlobalEventAggregator.Publish(new ScriptExecutionCompleted(scriptResult));
                 return scriptResult;
             }
