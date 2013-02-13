@@ -39,15 +39,14 @@ namespace MyCoolApp.Scripting
                 var hostObject = new ScriptingHostModel(project);
                 //var resultObject = _session.Execute(methodName);
                 _completedAt = DateTime.Now;
-                var resultString = "Execution completed successfully without a return value.";
-                var scriptResult = new ScriptExecutionResult(successful: true, result: resultString, elapsedTime: ElapsedTime);
+                var scriptResult = ScriptExecutionResult.Success(ElapsedTime);
                 Program.GlobalEventAggregator.Publish(new ScriptExecutionCompleted(scriptResult));
                 return scriptResult;
             }
             catch (Exception e)
             {
                 _completedAt = DateTime.Now;
-                var scriptResult = new ScriptExecutionResult(successful: false, result: e.Message, elapsedTime: ElapsedTime);
+                var scriptResult = ScriptExecutionResult.Failed(e.ToString(), ElapsedTime);
                 Program.GlobalEventAggregator.Publish(new ScriptExecutionCompleted(scriptResult));
                 return scriptResult;
             }

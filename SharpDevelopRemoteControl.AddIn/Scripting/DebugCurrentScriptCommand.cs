@@ -174,7 +174,38 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
                     context.CurrentProject.OutputAssemblyFullPath,
                     context.DeclaringClass.FullyQualifiedName,
                     context.Method.Name));
+            task.ContinueWith(completedTask => HandleScriptExecutionComplete(completedTask, context));
             task.Start(TaskScheduler.Default);
+        }
+
+        private static void HandleScriptExecutionComplete(Task<ScriptExecutionResult> completedTask, ScriptContext context)
+        {
+            if (DebuggerService.CurrentDebugger.IsAttached)
+            {
+                WorkbenchSingleton.SafeThreadCall(() => DebuggerService.CurrentDebugger.Detach());
+            }
+
+            if (completedTask.IsFaulted && completedTask.Exception != null)
+            {
+                LogError(context, (completedTask.Exception.InnerExceptions.FirstOrDefault() ??
+                                   completedTask.Exception).Message);
+                WorkbenchSingleton.StatusBar.SetMessage("The script failed with an exception");
+                return;
+            }
+
+            var result = completedTask.Result;
+            if (result != null)
+            {
+                if (result.Successful == false)
+                {
+                    LogError(context, result.FailureReason);
+                    WorkbenchSingleton.StatusBar.SetMessage("The script failed after running for " + result.ElapsedTime.ToString());
+                }
+                else
+                {
+                    WorkbenchSingleton.StatusBar.SetMessage("The script completed successfully after " + result.ElapsedTime.ToString());
+                }
+            }
         }
 
         private static void LogError(

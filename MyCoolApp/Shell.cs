@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Caliburn.Micro;
@@ -10,6 +11,7 @@ using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Events.Diagnostics;
 using MyCoolApp.Events.Scripting;
 using MyCoolApp.Projects;
+using MyCoolApp.Properties;
 using MyCoolApp.Scripting;
 
 namespace MyCoolApp
@@ -20,6 +22,7 @@ namespace MyCoolApp
         IHandle<ProjectClosed>,
         IHandle<DevelopmentEnvironmentConnected>,
         IHandle<DevelopmentEnvironmentDisconnected>,
+        IHandle<ScriptingAssemblyLoaded>,
         IHandle<ScriptExecutionCompleted>,
         IHandle<LogInfoEvent>,
         IHandle<LogErrorEvent>
@@ -28,19 +31,22 @@ namespace MyCoolApp
         private const string DefaultApplicationTitle = "Host Application";
 
         public IProjectManager ProjectManager { get; set; }
-        public SharpDevelopAdapter SharpDevelopAdapter { get; set; }
+        public ISharpDevelopAdapter SharpDevelopAdapter { get; set; }
+        public IScriptingService ScriptingService { get; set; }
         public Logger Logger { get; set; }
 
         public Shell()
         {
+            InitializeComponent();
+            Program.GlobalEventAggregator.Subscribe(this);
+
             ProjectManager = Projects.ProjectManager.Instance;
-            SharpDevelopAdapter = SharpDevelopAdapter.Instance;
+            SharpDevelopAdapter = Development.SharpDevelopAdapter.Instance;
+            ScriptingService = Scripting.ScriptingService.Instance;
             Logger = Logger.Instance;
 
-            InitializeComponent();
             Text = DefaultApplicationTitle;
             EvaluateCommands();
-            Program.GlobalEventAggregator.Subscribe(this);
         }
 
         private void NewProjectToolStripMenuItemClick(object sender, EventArgs e)
@@ -118,6 +124,33 @@ namespace MyCoolApp
                                   }));
         }
 
+        public new void Handle(ScriptingAssemblyLoaded message)
+        {
+            if (IsDisposed) return;
+
+            Invoke(new Action(
+                       () =>
+                           {
+                               Logger.Info(string.Join(", ", message.ScriptNames));
+                               runScriptToolStripMenuItem.DropDownItems.Clear();
+                               var toolStripButtons =
+                                   message.ScriptNames
+                                          .Select(x => new ToolStripMenuItem(x, Resources.script_go, ExecuteScript))
+                                          .ToArray();
+                               foreach (var button in toolStripButtons)
+                               {
+                                   runScriptToolStripMenuItem.DropDownItems.Add(button);
+                               }
+                           }));
+        }
+
+        private void ExecuteScript(object sender, EventArgs e)
+        {
+            var scriptName = ((ToolStripMenuItem) sender).Text;
+            Logger.Info("Execute " + scriptName);
+            ScriptingService.ExecuteScript(scriptName);
+        }
+
         public new void Handle(ScriptExecutionCompleted message)
         {
             if (IsDisposed) return;
@@ -159,8 +192,9 @@ namespace MyCoolApp
             closeProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             recalculateToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
-            runScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingSolution;
-            debugScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingSolution;
+            runScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingProject;
+            if (ProjectManager.HasScriptingProject == false) runScriptToolStripMenuItem.DropDownItems.Clear();
+            debugScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingProject;
             toggleOutputWindowButton.Checked = outputWindow.Visible;
         }
 

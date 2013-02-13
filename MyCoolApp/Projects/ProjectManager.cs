@@ -21,7 +21,7 @@ namespace MyCoolApp.Projects
         public Project Project { get; private set; }
         public bool IsProjectLoaded { get { return Project != null; } }
         
-        public bool HasScriptingSolution
+        public bool HasScriptingProject
         {
             get
             {

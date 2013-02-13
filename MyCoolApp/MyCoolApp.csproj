@@ -85,6 +85,7 @@
     <Compile Include="Events\ProjectLoaded.cs" />
     <Compile Include="Events\Scripting\ScriptExecutionCompleted.cs" />
     <Compile Include="Events\Scripting\ScriptExecutionStarted.cs" />
+    <Compile Include="Events\Scripting\ScriptingAssemblyLoaded.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Model\IDirty.cs" />
     <Compile Include="Model\PlannedActivityViewModel.cs" />

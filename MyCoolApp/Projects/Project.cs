@@ -14,15 +14,27 @@ namespace MyCoolApp.Projects
             ProjectFilePath = Path.GetFullPath(projectFilePath);
             Name = Path.GetFileNameWithoutExtension(ProjectFilePath);
             ProjectFolder = Path.GetDirectoryName(ProjectFilePath);
-            ScriptingFolder = Path.Combine(ProjectFolder, "Scripting");
-            ScriptingProjectFilePath = Path.Combine(ScriptingFolder, Name + ".vbproj");
         }
 
         public string Name { get; set; }
         public string ProjectFolder { get; private set; }
         public string ProjectFilePath { get; private set; }
-        public string ScriptingFolder { get; private set; }
-        public string ScriptingProjectFilePath { get; private set; }
+
+        public string ScriptingFolder
+        {
+            get { return Path.Combine(ProjectFolder, "Scripting"); }
+        }
+
+        public string ScriptingProjectFilePath
+        {
+            get { return Path.Combine(ScriptingFolder, Name + ".vbproj"); }
+        }
+
+        public string ScriptingAssemblyFilename
+        {
+            get { return Name + ".dll"; }
+        }
+
         public ObservableCollection<PlannedActivityViewModel> PlannedActivities { get; private set; }
         public bool IsDirty { get { return PlannedActivities.Any(x => x.IsDirty); } }
 
