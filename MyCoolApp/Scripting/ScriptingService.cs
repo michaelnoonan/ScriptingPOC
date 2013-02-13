@@ -12,49 +12,53 @@ namespace MyCoolApp.Scripting
 {
     public class ScriptingService :
         IScriptingService,
-        IHandle<ProjectLoaded>
+        IHandle<ProjectLoaded>,
+        IHandle<ProjectUnloaded>
     {
         public static ScriptingService Instance =
             new ScriptingService(
-                () => new ScriptExecutor(Logger.Instance),
                 ProjectManager.Instance,
                 Program.GlobalEventAggregator,
+                ScriptExecutor.Instance,
+                new ScriptingAssemblyFileWatcher(Program.GlobalEventAggregator), 
                 Logger.Instance);
 
-        private readonly Func<ScriptExecutor> _scriptExecutorFactory;
         private readonly IProjectManager _projectManager;
         private readonly IEventAggregator _globalEventAggregator;
+        private readonly ScriptExecutor _scriptExecutor;
         private readonly Logger _logger;
+        private readonly ScriptingAssemblyFileWatcher _watcher;
         private Assembly _currentScriptingAssembly;
-        private readonly object _scriptingAssemblyLock = new object();
 
         public ScriptingService(
-            Func<ScriptExecutor> scriptExecutorFactory,
             IProjectManager projectManager,
             IEventAggregator globalEventAggregator,
+            ScriptExecutor scriptExecutor,
+            ScriptingAssemblyFileWatcher watcher,
             Logger logger)
         {
-            _scriptExecutorFactory = scriptExecutorFactory;
             _projectManager = projectManager;
             _globalEventAggregator = globalEventAggregator;
+            _scriptExecutor = scriptExecutor;
+            _watcher = watcher;
+            _watcher.NewScriptingAssemblyAvailable += NewScriptingAssemblyAvailable;
             _logger = logger;
-
             _globalEventAggregator.Subscribe(this);
         }
 
-        public Assembly LoadMostRecentScriptingAssembly()
+        public Assembly LoadScriptingAssembly()
         {
             if (_projectManager.HasScriptingProject)
             {
                 var project = _projectManager.Project;
-                var matchingFiles = Directory.EnumerateFiles(project.ScriptingFolder, project.ScriptingAssemblyFilename, SearchOption.AllDirectories);
-                var mostRecentScriptingAssemblyPath = matchingFiles.OrderByDescending(File.GetCreationTime).FirstOrDefault();
-                if (mostRecentScriptingAssemblyPath != null)
+                if (File.Exists(project.ScriptingAssemblyFilePath))
                 {
-                    _logger.Info("Loading Scripting assembly at {0}", mostRecentScriptingAssemblyPath);
+                    _logger.Info("Loading Scripting assembly at {0}", project.ScriptingAssemblyFilePath);
                     try
                     {
-                        var assembly = Assembly.LoadFrom(mostRecentScriptingAssemblyPath);
+                        var assemblyBytes = File.ReadAllBytes(project.ScriptingAssemblyFilePath);
+                        var symbolBytes = File.ReadAllBytes(project.ScriptingSymbolsFilePath);
+                        var assembly = Assembly.Load(assemblyBytes, symbolBytes);
                         SetCurrentScriptingAssembly(assembly);
                         _logger.Info("Loaded {0}", assembly.FullName);
                         return assembly;
@@ -71,16 +75,13 @@ namespace MyCoolApp.Scripting
 
         private void SetCurrentScriptingAssembly(Assembly assembly)
         {
-            lock (_scriptingAssemblyLock)
-            {
-                _currentScriptingAssembly = assembly;
-                var scriptNames = _currentScriptingAssembly
-                    .GetTypes()
-                    .Where(t => t.GetMethods().Any(m => m.Name == "Main" && m.IsStatic && !m.GetParameters().Any()))
-                    .Select(t => t.FullName)
-                    .ToArray();
-                _globalEventAggregator.Publish(new ScriptingAssemblyLoaded(scriptNames));
-            }
+            _currentScriptingAssembly = assembly;
+            var scriptNames = _currentScriptingAssembly
+                .GetTypes()
+                .Where(t => t.GetMethods().Any(m => m.Name == "Main" && m.IsStatic && !m.GetParameters().Any()))
+                .Select(t => t.FullName)
+                .ToArray();
+            _globalEventAggregator.Publish(new ScriptingAssemblyLoaded(scriptNames));
         }
 
         public ScriptExecutionResult ExecuteScript(string className)
@@ -88,70 +89,35 @@ namespace MyCoolApp.Scripting
             if (_currentScriptingAssembly == null)
                 throw new InvalidOperationException("There is no scripting assembly loaded.");
 
-            lock (_scriptingAssemblyLock)
-            {
-                var method = _currentScriptingAssembly.GetType(className).GetMethod("Main");
-                method.Invoke(null, null);
-                return ScriptExecutionResult.Success(TimeSpan.FromSeconds(5));
-            }
+            return _scriptExecutor.ExecuteScript(_currentScriptingAssembly, className, "Main");
         }
 
-        public ScriptLoadResult LoadScript(string assemblyPath, string className, string methodName)
+        public ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName)
         {
-            _logger.Info("Loading Script from assembly at {0} in class {1} method {2}", assemblyPath, className, methodName);
+            _logger.Info("Execute Script in class {0} method {1} from {2}", className, methodName, assemblyName);
 
-            Assembly assembly;
-            try
-            {
-                assembly = Assembly.LoadFrom(assemblyPath);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e.Message);
-                return ScriptLoadResult.Failed(e.Message);
-            }
-
-            _logger.Info("Loaded {0}", assembly.FullName);
+            var assembly = _currentScriptingAssembly;
+            if (assembly.FullName != assemblyName)
+                throw new Exception(
+                    string.Format(
+                        "The currently loaded scripting assembly is not the same version as expected to execute this script. Most likely we need to wait for the assembly to load before attempting to execute the script. Expected: '{0}' Loaded: '{1}'",
+                        assemblyName, assembly.FullName));
 
             var declaringClass = assembly.GetType(className);
             if (declaringClass == null)
-            {
-                var result = ScriptLoadResult.Failed("There is no class called '{0}' in the assembly '{1}'", className, assembly.FullName);
-                _logger.Error(result.FailureReason);
-                return result;
-            }
+                throw new Exception(
+                    string.Format("The class '{0}' is not available in the currently loaded scripting assembly: {1}",
+                                  className, assembly.FullName));
 
             var method = declaringClass.GetMethod(methodName);
             if (method == null)
-            {
-                var result =
-                    ScriptLoadResult.Failed("There is no method called '{0}' on the class '{1}' in the assembly '{2}'",
-                                            methodName, className, assembly.FullName);
-                _logger.Error(result.FailureReason);
-                return result;
-            }
+                throw new Exception(
+                    string.Format("The method '{0}' does not exist on the class '{1}' in '{2}'.",
+                                  methodName, className, assembly.FullName));
 
             if (method.IsStatic == false || method.GetParameters().Any())
-            {
-                var result =
-                    ScriptLoadResult.Failed(
-                        "The method '{0}' on class '{1}' should be Static/Shared and have no parameters.",
-                        methodName, className);
-                _logger.Error(result.FailureReason);
-                return result;
-            }
-
-            return ScriptLoadResult.Success();
-        }
-
-        public ScriptExecutionResult ExecuteScript(string assemblyPath, string className, string methodName)
-        {
-            _logger.Info("Execute Script from assembly at {0} in class {1} method {2}", assemblyPath, className, methodName);
-
-            var assembly = Assembly.LoadFrom(assemblyPath);
-
-            var declaringClass = assembly.GetType(className);
-            var method = declaringClass.GetMethod(methodName);
+                throw new Exception(
+                    string.Format("The method '{0}' should be static and have no parameters.", method.Name));
 
             try
             {
@@ -165,9 +131,23 @@ namespace MyCoolApp.Scripting
             }
         }
 
+        private void NewScriptingAssemblyAvailable(object sender, NewScriptingAssemblyEventArgs e)
+        {
+            if (_projectManager.IsProjectLoaded &&
+                e.ScriptingAssemblyPath == _projectManager.Project.ScriptingAssemblyFilePath)
+            {
+                LoadScriptingAssembly();
+            }
+        }
+
         public void Handle(ProjectLoaded message)
         {
-            LoadMostRecentScriptingAssembly();
+            LoadScriptingAssembly();
+        }
+
+        public void Handle(ProjectUnloaded message)
+        {
+            _currentScriptingAssembly = null;
         }
     }
 }

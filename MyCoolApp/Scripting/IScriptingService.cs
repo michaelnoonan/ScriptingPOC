@@ -5,9 +5,8 @@ namespace MyCoolApp.Scripting
 {
     public interface IScriptingService
     {
-        ScriptExecutionResult ExecuteScript(string assemblyPath, string className, string methodName);
+        ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName);
         ScriptExecutionResult ExecuteScript(string className);
-        ScriptLoadResult LoadScript(string assemblyPath, string className, string methodName);
-        Assembly LoadMostRecentScriptingAssembly();
+        Assembly LoadScriptingAssembly();
     }
 }

@@ -1,54 +1,73 @@
 ﻿using System;
-using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
-using MyCoolApp.Events.Scripting;
-using MyCoolApp.Model;
-using MyCoolApp.Projects;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Scripting
 {
     public class ScriptExecutor
     {
-        private readonly Logger _logger;
-        private DateTime? _startedAt;
-        private DateTime? _completedAt;
+        public static ScriptExecutor Instance = new ScriptExecutor(Logger.Instance);
 
-        public TimeSpan ElapsedTime
-        {
-            get { return (_startedAt.HasValue && _completedAt.HasValue) ? _completedAt.Value - _startedAt.Value : TimeSpan.Zero; }
-        }
+        private readonly Logger _logger;
+        private bool _currentlyExecuting;
 
         public ScriptExecutor(Logger logger)
         {
             _logger = logger;
         }
 
-        public Task<ScriptExecutionResult> ExecuteScriptAsync(string methodName)
+        private void AssertSingleScript()
         {
-            return (Task<ScriptExecutionResult>) Task.Run(() => { throw new NotImplementedException(); });
+            if (_currentlyExecuting)
+                throw new InvalidOperationException("A script is currently executing - only one script can execute at a time.");
         }
 
-        public ScriptExecutionResult ExecuteScript(Project project, string assemblyPath, string scriptMethodPath)
+        public Task<ScriptExecutionResult> ExecuteScriptAsync(Assembly assembly, string className, string methodName)
         {
-            _logger.Info("Execute Script in {0} at path {1}", assemblyPath, scriptMethodPath);
+            AssertSingleScript();
 
-            _startedAt = DateTime.Now;
+            return (Task<ScriptExecutionResult>) Task.Run(() => { ExecuteScript(assembly, className, methodName); });
+        }
+
+        public ScriptExecutionResult ExecuteScript(Assembly assembly, string className, string methodName)
+        {
+            AssertSingleScript();
+            _currentlyExecuting = true;
+
+            var declaringClass = assembly.GetType(className);
+            if (declaringClass == null)
+                throw new Exception(
+                    string.Format("The class '{0}' is not available in the currently loaded scripting assembly: {1}",
+                                  className, assembly.FullName));
+
+            var method = declaringClass.GetMethod(methodName);
+            if (method == null)
+                throw new Exception(
+                    string.Format("The method '{0}' does not exist on the class '{1}' in '{2}'.",
+                                  methodName, className, assembly.FullName));
+
+            if (method.IsStatic == false || method.GetParameters().Any())
+                throw new Exception(
+                    string.Format("The method '{0}' should be static and have no parameters.", method.Name));
+
+            var startedAt = DateTime.MinValue;
+            var completedAt = DateTime.MinValue;
             try
             {
-                var hostObject = new ScriptingHostModel(project);
-                //var resultObject = _session.Execute(methodName);
-                _completedAt = DateTime.Now;
-                var scriptResult = ScriptExecutionResult.Success(ElapsedTime);
-                Program.GlobalEventAggregator.Publish(new ScriptExecutionCompleted(scriptResult));
-                return scriptResult;
+                startedAt = DateTime.Now;
+                method.Invoke(null, null);
+                completedAt = DateTime.Now;
+                _currentlyExecuting = false;
+                return ScriptExecutionResult.Success(completedAt - startedAt);
             }
             catch (Exception e)
             {
-                _completedAt = DateTime.Now;
-                var scriptResult = ScriptExecutionResult.Failed(e.ToString(), ElapsedTime);
-                Program.GlobalEventAggregator.Publish(new ScriptExecutionCompleted(scriptResult));
-                return scriptResult;
+                completedAt = DateTime.Now;
+                _currentlyExecuting = false;
+                _logger.Error(e, "The script failed with an exception.");
+                return ScriptExecutionResult.Failed(e.Message, completedAt - startedAt);
             }
         }
     }

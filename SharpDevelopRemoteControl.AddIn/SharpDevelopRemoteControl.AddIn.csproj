@@ -90,6 +90,8 @@
     <Compile Include="HostApplicationAdapter.cs" />
     <Compile Include="CommandListener.cs" />
     <Compile Include="Scripting\DebugCurrentScriptCommand.cs" />
+    <Compile Include="Scripting\ScriptContext.cs" />
+    <Compile Include="Scripting\ScriptContextBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="RemoteControl.addin">

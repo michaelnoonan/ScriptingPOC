@@ -30,9 +30,14 @@ namespace MyCoolApp.Projects
             get { return Path.Combine(ScriptingFolder, Name + ".vbproj"); }
         }
 
-        public string ScriptingAssemblyFilename
+        public string ScriptingAssemblyFilePath
         {
-            get { return Name + ".dll"; }
+            get { return Path.Combine(ScriptingFolder, @"bin\" + Name + ".dll"); }
+        }
+
+        public string ScriptingSymbolsFilePath
+        {
+            get { return Path.Combine(ScriptingFolder, @"bin\" + Name + ".pdb"); }
         }
 
         public ObservableCollection<PlannedActivityViewModel> PlannedActivities { get; private set; }

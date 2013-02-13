@@ -35,7 +35,7 @@ namespace MyCoolApp.Projects
         {
             if (IsProjectLoaded)
             {
-                CloseProject();
+                UnloadProject();
             }
 
             var projectFileName = Path.GetFileName(projectPath) + ".proj";
@@ -59,7 +59,7 @@ namespace MyCoolApp.Projects
         {
             if (IsProjectLoaded)
             {
-                CloseProject();
+                UnloadProject();
             }
 
             Project = _projectLoader.LoadProject(projectFilePath);
@@ -75,11 +75,11 @@ namespace MyCoolApp.Projects
             Project.MarkAsClean();
         }
 
-        public void CloseProject()
+        public void UnloadProject()
         {
-            var projectBeingClosed = Project;
+            var projectBeingUnloaded = Project;
             Project = null;
-            Program.GlobalEventAggregator.Publish(new ProjectClosed(projectBeingClosed));
+            Program.GlobalEventAggregator.Publish(new ProjectUnloaded(projectBeingUnloaded));
         }
     }
 }

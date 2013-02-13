@@ -81,7 +81,7 @@
     <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentConnected.cs" />
     <Compile Include="Events\Diagnostics\LogErrorEvent.cs" />
     <Compile Include="Events\Diagnostics\LogInfoEvent.cs" />
-    <Compile Include="Events\ProjectClosed.cs" />
+    <Compile Include="Events\ProjectUnloaded.cs" />
     <Compile Include="Events\ProjectLoaded.cs" />
     <Compile Include="Events\Scripting\ScriptExecutionCompleted.cs" />
     <Compile Include="Events\Scripting\ScriptExecutionStarted.cs" />
@@ -98,7 +98,9 @@
     <Compile Include="Projects\ProjectManager.cs" />
     <Compile Include="Scripting\IScriptingProjectBuilder.cs" />
     <Compile Include="Scripting\IScriptingService.cs" />
+    <Compile Include="Scripting\NewScriptingAssemblyEventArgs.cs" />
     <Compile Include="Scripting\ScriptExecutor.cs" />
+    <Compile Include="Scripting\ScriptingAssemblyFileWatcher.cs" />
     <Compile Include="Scripting\ScriptingHostModel.cs" />
     <Compile Include="Scripting\ScriptingProjectBuilder.cs" />
     <Compile Include="Scripting\ScriptingService.cs" />

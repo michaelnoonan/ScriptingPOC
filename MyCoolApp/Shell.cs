@@ -19,7 +19,7 @@ namespace MyCoolApp
     public partial class Shell :
         Form,
         IHandle<ProjectLoaded>,
-        IHandle<ProjectClosed>,
+        IHandle<ProjectUnloaded>,
         IHandle<DevelopmentEnvironmentConnected>,
         IHandle<DevelopmentEnvironmentDisconnected>,
         IHandle<ScriptingAssemblyLoaded>,
@@ -81,7 +81,7 @@ namespace MyCoolApp
 
         private void CloseProjectToolStripMenuItemClick(object sender, EventArgs e)
         {
-            ProjectManager.CloseProject();
+            ProjectManager.UnloadProject();
         }
 
         public new void Handle(ProjectLoaded message)
@@ -93,11 +93,11 @@ namespace MyCoolApp
             Invoke(new Action(EvaluateCommands));
         }
 
-        public new void Handle(ProjectClosed message)
+        public new void Handle(ProjectUnloaded message)
         {
             plannedActivitiesBindingSource.Clear();
             Text = DefaultApplicationTitle;
-            StatusLabel.Text = string.Format("Project closed: {0}", message.ClosedProject.ProjectFilePath);
+            StatusLabel.Text = string.Format("Project closed: {0}", message.UnloadedProject.ProjectFilePath);
             Invoke(new Action(EvaluateCommands));
         }
 

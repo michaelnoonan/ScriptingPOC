@@ -8,6 +8,6 @@ namespace MyCoolApp.Projects
         void CreateNewProject(string projectPath);
         void LoadProject(string projectFilePath);
         void SaveProject();
-        void CloseProject();
+        void UnloadProject();
     }
 }

@@ -1,136 +1,49 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Reflection;
 using System.Threading.Tasks;
 using ICSharpCode.AvalonEdit.AddIn;
 using ICSharpCode.Core;
-using ICSharpCode.NRefactory;
 using ICSharpCode.SharpDevelop;
+using ICSharpCode.SharpDevelop.Commands;
 using ICSharpCode.SharpDevelop.Debugging;
-using ICSharpCode.SharpDevelop.Dom;
 using ICSharpCode.SharpDevelop.Gui;
 using ICSharpCode.SharpDevelop.Project;
 using SharpDevelopRemoteControl.Contracts;
-
 
 namespace SharpDevelopRemoteControl.AddIn.Scripting
 {
     public class DebugCurrentScriptCommand : AbstractCommand
     {
-        public class ScriptContext
-        {
-            public ScriptContext(
-                IProject currentProject,
-                FileName currentFileName,
-                Location caretLocation,
-                IClass declaringClass,
-                IMethod method)
-            {
-                CurrentProject = currentProject;
-                CurrentFileName = currentFileName;
-                CaretLocation = caretLocation;
-                DeclaringClass = declaringClass;
-                Method = method;
-            }
-
-            public IProject CurrentProject { get; private set; }
-            public FileName CurrentFileName { get; private set; }
-            public Location CaretLocation { get; private set; }
-            public IClass DeclaringClass { get; private set; }
-            public IMethod Method { get; private set; }
-        }
-
         public override void Run()
         {
-            // TODO: This should be done asynchronously to stop blocking the UI thread!
-            var avalonEditViewContent = WorkbenchSingleton.Workbench.ActiveViewContent as AvalonEditViewContent;
+            // Ensure everything is saved to disk before doing anything else
+            ProjectService.SaveSolution();
+            SaveAllFiles.SaveAll();
+            var activeView = WorkbenchSingleton.Workbench.ActiveViewContent as AvalonEditViewContent;
 
-            if (avalonEditViewContent != null)
+            if (activeView == null) return;
+
+            ScriptContext context;
+            if (new ScriptContextBuilder().TryBuildContext(activeView, out context))
             {
-                var currentFileName = avalonEditViewContent.PrimaryFileName;
-                var caretLocation = avalonEditViewContent.CodeEditor.ActiveTextEditorAdapter.Caret.Position;
-
-                // Parse the file
-                var parseInfo = ParserService.GetExistingParseInformation(currentFileName) ??
-                                ParserService.ParseFile(currentFileName);
-
-                var bestMatchingClass = GetBestMatchingClassFromCurrentCaretPosition(parseInfo, caretLocation);
-                IMethod mainMethod = null;
-                if (bestMatchingClass != null)
-                {
-                    LoggingService.Info(bestMatchingClass.FullyQualifiedName);
-                    mainMethod = bestMatchingClass.Methods.FirstOrDefault(m => m.Name == "Main" && m.Parameters.Count == 0);
-                    if (mainMethod != null)
-                    {
-                        LoggingService.Info(mainMethod.FullyQualifiedName);
-                    }
-                }
-
-                if (mainMethod == null)
-                {
-                    TaskService.Add(new ICSharpCode.SharpDevelop.Task(currentFileName,
-                         "Which script do you want to run? Please move the text cursor inside a Module or Class with a Subroutine called 'Main' with no parameters.",
-                         caretLocation.Column, caretLocation.Line, TaskType.Error));
-                    return;
-                }
-
-                var currentProject = ProjectService.CurrentProject;
-                BuildEngine.BuildInGui(
-                    currentProject,
-                    new BuildOptions(BuildTarget.Build,
-                                     r =>
-                                         {
-                                             if (r.Result == BuildResultCode.Success)
-                                             {
-                                                 var context = new ScriptContext(
-                                                     currentProject,
-                                                     currentFileName,
-                                                     caretLocation,
-                                                     bestMatchingClass,
-                                                     mainMethod);
-                                                 LoadScriptIntoHostApplication(context);
-                                             }
-                                         }));
+                BuildProject(context);
             }
         }
 
-        private static void LoadScriptIntoHostApplication(ScriptContext context)
+        private static void BuildProject(ScriptContext context)
         {
-            WorkbenchSingleton.StatusBar.SetMessage("Loading script into host application...");
-
-            var task = new Task<ScriptLoadResult>(
-                () => HostApplicationAdapter.Instance.LoadScript(
-                    context.CurrentProject.OutputAssemblyFullPath,
-                    context.DeclaringClass.FullyQualifiedName,
-                    context.Method.Name));
-
-            task.ContinueWith(completedTask => HandleScriptLoaded(completedTask, context));
-            task.Start(TaskScheduler.Default);
+            BuildEngine.BuildInGui(context.CurrentProject,
+                new BuildOptions(BuildTarget.Rebuild, buildResults => HandleBuildResult(context, buildResults)));
         }
 
-        private static void HandleScriptLoaded(Task<ScriptLoadResult> completedTask, ScriptContext context)
+        private static void HandleBuildResult(ScriptContext context, BuildResults buildResults)
         {
-            if (completedTask.IsFaulted && completedTask.Exception != null)
+            if (buildResults.Result == BuildResultCode.Success)
             {
-                LogError(context, (completedTask.Exception.InnerExceptions.FirstOrDefault() ??
-                                   completedTask.Exception).Message);
-                WorkbenchSingleton.StatusBar.SetMessage("Failed to load script in host application");
-                return;
-            }
-
-            var result = completedTask.Result;
-            if (result != null)
-            {
-                if (result.Successful == false)
-                {
-                    LogError(context, result.FailureReason);
-                    WorkbenchSingleton.StatusBar.SetMessage("Failed to load script in host application");
-                }
-                else
-                {
-                    AttachDebugger(context);
-                }
+                AttachDebugger(context);
             }
         }
 
@@ -167,11 +80,14 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
 
         private static void ExecuteScript(ScriptContext context)
         {
-            WorkbenchSingleton.StatusBar.SetMessage("Executing script");
+            var assembly = Assembly.Load(File.ReadAllBytes(context.CurrentProject.OutputAssemblyFullPath));
+            var assemblyName = assembly.GetName().FullName;
+
+            WorkbenchSingleton.StatusBar.SetMessage("Executing script in " + assemblyName);
 
             var task = new Task<ScriptExecutionResult>(
-                () => HostApplicationAdapter.Instance.ExecuteScript(
-                    context.CurrentProject.OutputAssemblyFullPath,
+                () => HostApplicationAdapter.Instance.ExecuteScriptForDebugging(
+                    assemblyName,
                     context.DeclaringClass.FullyQualifiedName,
                     context.Method.Name));
             task.ContinueWith(completedTask => HandleScriptExecutionComplete(completedTask, context));
@@ -221,38 +137,6 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
                         context.CaretLocation.Column,
                         context.CaretLocation.Line,
                         TaskType.Error));
-        }
-
-        private IClass GetBestMatchingClassFromCurrentCaretPosition(ParseInformation parseInfo, Location caretLocation)
-        {
-            var availableClasses = parseInfo.CompilationUnit.Classes;
-
-            IClass matchInside = null;
-            IClass nearestMatch = null;
-            var nearestMatchDistance = int.MaxValue;
-            foreach (var availableClass in availableClasses)
-            {
-                if (availableClass.Region.IsInside(caretLocation.Line, caretLocation.Column))
-                {
-                    matchInside = availableClass;
-                    // when there are multiple matches inside (nested classes), use the last one
-                }
-                else
-                {
-                    // Not a perfect match?
-                    // Try to first the nearest match. We want the classes combo box to always
-                    // have a class selected if possible.
-                    int matchDistance = Math.Min(Math.Abs(caretLocation.Line - availableClass.Region.BeginLine),
-                                                 Math.Abs(caretLocation.Line - availableClass.Region.EndLine));
-                    if (matchDistance < nearestMatchDistance)
-                    {
-                        nearestMatchDistance = matchDistance;
-                        nearestMatch = availableClass;
-                    }
-                }
-            }
-
-            return matchInside ?? nearestMatch;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace MyCoolApp.Development
     public class SharpDevelopAdapter :
         IDisposable,
         IHandle<ProjectLoaded>,
-        IHandle<ProjectClosed>,
+        IHandle<ProjectUnloaded>,
         IHandle<DevelopmentEnvironmentConnected>,
         IHandle<DevelopmentEnvironmentDisconnected>, ISharpDevelopAdapter
     {
@@ -149,7 +149,7 @@ namespace MyCoolApp.Development
             }
         }
 
-        public void Handle(ProjectClosed message)
+        public void Handle(ProjectUnloaded message)
         {
             ShutDownDevelopmentEnvironment();
         }
