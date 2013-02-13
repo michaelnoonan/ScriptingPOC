@@ -113,9 +113,10 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
         {
             if (completedTask.IsFaulted && completedTask.Exception != null)
             {
-                LogError(context, TaskType.Error,
-                                       (completedTask.Exception.InnerExceptions.FirstOrDefault() ??
-                                        completedTask.Exception).Message);
+                LogError(context, (completedTask.Exception.InnerExceptions.FirstOrDefault() ??
+                                   completedTask.Exception).Message);
+                WorkbenchSingleton.StatusBar.SetMessage("Failed to load script in host application");
+                return;
             }
 
             var result = completedTask.Result;
@@ -123,35 +124,61 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
             {
                 if (result.Successful == false)
                 {
-                    LogError(context, TaskType.Error, result.FailureReason);
+                    LogError(context, result.FailureReason);
+                    WorkbenchSingleton.StatusBar.SetMessage("Failed to load script in host application");
                 }
                 else
                 {
-                    AttachDebuggerAndExecuteScript(context);
+                    AttachDebugger(context);
                 }
             }
         }
 
-        private static void AttachDebuggerAndExecuteScript(ScriptContext context)
+        private static void AttachDebugger(ScriptContext context)
         {
-            LoggingService.Info("Attaching to process" + HostApplicationAdapter.Instance.HostApplicationProcessId);
-            LoggingService.Info("Current debugger: " + DebuggerService.CurrentDebugger.GetType().Name);
+            WorkbenchSingleton.StatusBar.SetMessage("Attaching the debugger...");
+            LoggingService.Info("Attaching to process with ID: " + HostApplicationAdapter.Instance.HostApplicationProcessId);
             var process = Process.GetProcessById(HostApplicationAdapter.Instance.HostApplicationProcessId);
-            LoggingService.Info("Process is " + process.ProcessName);
-            LoggingService.Info("Thread ID is " + Thread.CurrentThread.ManagedThreadId);
-            LoggingService.Info("InvokeRequired: " + WorkbenchSingleton.InvokeRequired);
+            LoggingService.Info("Process Name is: " + process.ProcessName);
+            if (process.HasExited)
+            {
+                LogError(context, "The host application has exited and cannot be debugged.");
+                WorkbenchSingleton.StatusBar.SetMessage("Failed to attach the debugger");
+                return;
+            }
 
             WorkbenchSingleton.SafeThreadAsyncCall(
                 () =>
                     {
-                        LoggingService.Info("Thread ID is " + Thread.CurrentThread.ManagedThreadId);
-                        DebuggerService.CurrentDebugger.Attach(process);
+                        try
+                        {
+                            DebuggerService.CurrentDebugger.Attach(process);
+                        }
+                        catch (Exception e)
+                        {
+                            LogError(context, "Failed to attach the debugger: {0}", e.Message);
+                            WorkbenchSingleton.StatusBar.SetMessage("Failed to attach the debugger");
+                            throw;
+                        }
+
+                        ExecuteScript(context);
                     });
+        }
+
+        private static void ExecuteScript(ScriptContext context)
+        {
+            WorkbenchSingleton.StatusBar.SetMessage("Executing script");
+
+            var task = new Task<ScriptExecutionResult>(
+                () => HostApplicationAdapter.Instance.ExecuteScript(
+                    context.CurrentProject.OutputAssemblyFullPath,
+                    context.DeclaringClass.FullyQualifiedName,
+                    context.Method.Name));
+            task.Start(TaskScheduler.Default);
         }
 
         private static void LogError(
             ScriptContext context,
-            TaskType type,
             string messageFormat,
             params object[] args)
         {
@@ -162,7 +189,7 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
                         string.Format(messageFormat, args),
                         context.CaretLocation.Column,
                         context.CaretLocation.Line,
-                        type));
+                        TaskType.Error));
         }
 
         private IClass GetBestMatchingClassFromCurrentCaretPosition(ParseInformation parseInfo, Location caretLocation)
