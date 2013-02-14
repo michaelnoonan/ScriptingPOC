@@ -1,4 +1,6 @@
-﻿namespace MyCoolApp
+﻿using MyCoolApp.Domain.Model;
+
+namespace MyCoolApp
 {
     partial class Shell
     {
@@ -301,7 +303,7 @@
             // plannedActivitiesBindingSource
             // 
             this.plannedActivitiesBindingSource.AllowNew = true;
-            this.plannedActivitiesBindingSource.DataSource = typeof(MyCoolApp.Model.PlannedActivityViewModel);
+            this.plannedActivitiesBindingSource.DataSource = typeof(PlannedActivityViewModel);
             // 
             // debugScriptToolStripMenuItem
             // 

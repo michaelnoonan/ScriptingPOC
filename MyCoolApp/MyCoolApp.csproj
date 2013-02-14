@@ -55,63 +55,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BindableBase.cs" />
-    <Compile Include="Caliburn.Micro\EventAggregator.cs" />
-    <Compile Include="Caliburn.Micro\ExtensionMethods.cs" />
-    <Compile Include="Development\HostApplicationServiceHost.cs" />
-    <Compile Include="Development\HostApplicationService.cs" />
-    <Compile Include="Development\IHostApplicationServiceHost.cs" />
-    <Compile Include="Development\ISharpDevelopIntegrationService.cs" />
-    <Compile Include="Development\SharpDevelopIntegrationService.cs" />
-    <Compile Include="Diagnostics\ILogger.cs" />
-    <Compile Include="Diagnostics\Logger.cs" />
-    <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentDisconnected.cs" />
-    <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentConnected.cs" />
-    <Compile Include="Events\DevelopmentEnvironment\ScriptingProjectLoadedInDevelopmentEnvironment.cs" />
-    <Compile Include="Events\DevelopmentEnvironment\ScriptingProjectUnloadedInDevelopmentEnvironment.cs" />
-    <Compile Include="Events\Diagnostics\LogErrorEvent.cs" />
-    <Compile Include="Events\Diagnostics\LogInfoEvent.cs" />
-    <Compile Include="Events\ProjectUnloaded.cs" />
-    <Compile Include="Events\ProjectLoaded.cs" />
-    <Compile Include="Events\Scripting\ScriptExecutionStarted.cs" />
-    <Compile Include="Events\Scripting\ScriptingAssemblyLoaded.cs" />
-    <Compile Include="Model\IDirty.cs" />
-    <Compile Include="Model\PlannedActivityViewModel.cs" />
-    <Compile Include="Persistence\PlannedActivity.cs" />
-    <Compile Include="Persistence\ProjectData.cs" />
-    <Compile Include="Persistence\ProjectLoader.cs" />
-    <Compile Include="Persistence\ProjectSaver.cs" />
-    <Compile Include="Projects\IProjectManager.cs" />
-    <Compile Include="Projects\Project.cs" />
-    <Compile Include="Projects\ProjectManager.cs" />
-    <Compile Include="Scripting\IScriptExecutor.cs" />
-    <Compile Include="Scripting\IScriptingAssemblyLoader.cs" />
-    <Compile Include="Scripting\IScriptingProjectBuilder.cs" />
-    <Compile Include="Scripting\IScriptingService.cs" />
-    <Compile Include="Scripting\NewScriptingAssemblyEventArgs.cs" />
-    <Compile Include="Scripting\ScriptExecutor.cs" />
-    <Compile Include="Scripting\ScriptingAssemblyFileWatcher.cs" />
-    <Compile Include="Scripting\ScriptingAssemblyLoader.cs" />
-    <Compile Include="Scripting\ScriptingHostModel.cs" />
-    <Compile Include="Scripting\ScriptingProjectBuilder.cs" />
-    <Compile Include="Scripting\ScriptingService.cs" />
     <Compile Include="Shell.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -136,7 +85,9 @@
     </Compile>
     <None Include="app.config" />
     <None Include="CopySharpDevelop.targets" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\DataSources\MyCoolApp.Model.PlannedActivityViewModel.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -147,9 +98,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Scripting\VBScriptingProjectTemplate.zip" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MyCoolApp.Domain\MyCoolApp.Domain.csproj">
+      <Project>{ae45f4c1-1d33-4dd7-8106-e36a073206ae}</Project>
+      <Name>MyCoolApp.Domain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharpDevelopRemoteControl.Contracts\SharpDevelopRemoteControl.Contracts.csproj">
       <Project>{73c412e7-f255-497a-8732-e44355c567ce}</Project>
       <Name>SharpDevelopRemoteControl.Contracts</Name>

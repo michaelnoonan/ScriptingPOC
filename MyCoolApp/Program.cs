@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
-using Caliburn.Micro;
-using MyCoolApp.Development;
-using MyCoolApp.Diagnostics;
+using MyCoolApp.Domain.Development;
+using MyCoolApp.Domain.Diagnostics;
 
 namespace MyCoolApp
 {
     static class Program
     {
-        public static EventAggregator GlobalEventAggregator = new EventAggregator();
-
         [STAThread]
         static void Main()
         {

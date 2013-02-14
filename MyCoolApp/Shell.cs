@@ -3,16 +3,17 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using MyCoolApp.Domain;
 using Caliburn.Micro;
-using MyCoolApp.Development;
-using MyCoolApp.Diagnostics;
-using MyCoolApp.Events;
-using MyCoolApp.Events.DevelopmentEnvironment;
-using MyCoolApp.Events.Diagnostics;
-using MyCoolApp.Events.Scripting;
-using MyCoolApp.Projects;
+using MyCoolApp.Domain.Diagnostics;
+using MyCoolApp.Domain.Events;
+using MyCoolApp.Domain.Events.DevelopmentEnvironment;
+using MyCoolApp.Domain.Events.Diagnostics;
+using MyCoolApp.Domain.Events.Projects;
+using MyCoolApp.Domain.Events.Scripting;
+using MyCoolApp.Domain.Projects;
+using MyCoolApp.Domain.Scripting;
 using MyCoolApp.Properties;
-using MyCoolApp.Scripting;
 
 namespace MyCoolApp
 {
@@ -36,11 +37,11 @@ namespace MyCoolApp
         public Shell()
         {
             InitializeComponent();
-            Program.GlobalEventAggregator.Subscribe(this);
+            GlobalEventAggregator.Instance.Subscribe(this);
 
-            ProjectManager = Projects.ProjectManager.Instance;
-            ScriptingService = Scripting.ScriptingService.Instance;
-            Logger = Diagnostics.Logger.Instance;
+            ProjectManager = Domain.Projects.ProjectManager.Instance;
+            ScriptingService = Domain.Scripting.ScriptingService.Instance;
+            Logger = Domain.Diagnostics.Logger.Instance;
 
             SetTitle(DefaultApplicationTitle);
             EvaluateCommands();
