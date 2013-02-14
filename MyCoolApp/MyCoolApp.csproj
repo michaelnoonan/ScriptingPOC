@@ -210,6 +210,7 @@
     <None Include="Images\disconnect.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ICSharpCode.SharpDevelop.addin" />
     <Content Include="Images\clock.ico" />
     <Content Include="Images\clock.png" />
     <None Include="Images\disk.png" />

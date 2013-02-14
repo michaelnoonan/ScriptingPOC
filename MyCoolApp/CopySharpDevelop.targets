@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <SharpDevelopCustomizationFile Include="ICSharpCode.SharpDevelop.addin" />
     <SharpDevelopBinFiles Include="$(SolutionDir)\SharpDevelop\bin\**" />
     <SharpDevelopDataFiles Include="$(SolutionDir)\SharpDevelop\data\**" />
     <SharpDevelopAddInFiles Include="$(AddInsSourceDir)\*.addin" />
@@ -24,6 +25,7 @@
   <Target Name="CopyFiles" BeforeTargets="Build">
     <Exec Command="RMDIR /S /Q $(SharpDevelopTargetPath)" />
     <Error Condition="'@(SharpDevelopBinFiles)' == ''" Text="SharpDevelop project has not been built." />
+    <Copy SourceFiles="@(SharpDevelopCustomizationFile)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopBinFiles)" DestinationFolder="$(SharpDevelopTargetPath)\bin\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopDataFiles)" DestinationFolder="$(SharpDevelopTargetPath)\data\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopAddInFiles)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\%(RecursiveDir)" SkipUnchangedFiles="true" />
