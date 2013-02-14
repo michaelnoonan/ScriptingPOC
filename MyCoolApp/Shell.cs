@@ -44,7 +44,7 @@ namespace MyCoolApp
             ScriptingService = Scripting.ScriptingService.Instance;
             Logger = Diagnostics.Logger.Instance;
 
-            Text = DefaultApplicationTitle;
+            SetTitle(DefaultApplicationTitle);
             EvaluateCommands();
         }
 
@@ -83,11 +83,16 @@ namespace MyCoolApp
             ProjectManager.UnloadProject();
         }
 
+        private void SetTitle(string title)
+        {
+            Text = title + (Environment.Is64BitProcess ? "(x64)" : "(x86)");
+        }
+
         public new void Handle(ProjectLoaded message)
         {
             plannedActivitiesBindingSource.DataSource = message.LoadedProject.PlannedActivities;
-            Text = string.Format("{0} - {1}", message.LoadedProject.Name,
-                                 message.LoadedProject.ProjectFilePath);
+            SetTitle(string.Format("{0} - {1}", message.LoadedProject.Name,
+                                   message.LoadedProject.ProjectFilePath));
             StatusLabel.Text = string.Format("Project opened: {0}", message.LoadedProject.ProjectFilePath);
             Invoke(new Action(EvaluateCommands));
         }
@@ -95,7 +100,7 @@ namespace MyCoolApp
         public new void Handle(ProjectUnloaded message)
         {
             plannedActivitiesBindingSource.Clear();
-            Text = DefaultApplicationTitle;
+            SetTitle(DefaultApplicationTitle);
             StatusLabel.Text = string.Format("Project closed: {0}", message.UnloadedProject.ProjectFilePath);
             Invoke(new Action(EvaluateCommands));
         }
