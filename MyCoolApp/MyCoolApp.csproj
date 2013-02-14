@@ -84,6 +84,7 @@
     <Compile Include="Diagnostics\Logger.cs" />
     <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentDisconnected.cs" />
     <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentConnected.cs" />
+    <Compile Include="Events\DevelopmentEnvironment\ScriptingProjectLoadedInDevelopmentEnvironment.cs" />
     <Compile Include="Events\DevelopmentEnvironment\ScriptingProjectUnloadedInDevelopmentEnvironment.cs" />
     <Compile Include="Events\Diagnostics\LogErrorEvent.cs" />
     <Compile Include="Events\Diagnostics\LogInfoEvent.cs" />

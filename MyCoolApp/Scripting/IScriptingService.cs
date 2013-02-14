@@ -7,6 +7,6 @@ namespace MyCoolApp.Scripting
     {
         ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName);
         Task<ScriptExecutionResult> ExecuteScriptAsync(string className);
-        void LoadScriptingProject();
+        Task LoadScriptingProjectAsync();
     }
 }

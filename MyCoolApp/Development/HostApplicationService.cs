@@ -33,6 +33,11 @@ namespace MyCoolApp.Development
             return _scriptingService.ExecuteScriptForDebugging(assemblyName, className, methodName);
         }
 
+        public void ScriptingProjectLoaded(LoadScriptingProjectResult result)
+        {
+            _globalEventAggregator.Publish(new ScriptingProjectLoadedInDevelopmentEnvironment(result));
+        }
+
         public void ScriptingProjectUnloaded()
         {
             _globalEventAggregator.Publish(new ScriptingProjectUnloadedInDevelopmentEnvironment());

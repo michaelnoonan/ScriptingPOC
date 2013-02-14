@@ -151,6 +151,11 @@ namespace SharpDevelopRemoteControl.AddIn
             }
         }
 
+        public void AnnounceScriptingProjectLoaded(LoadScriptingProjectResult result)
+        {
+            ExecuteOperation(c => c.ScriptingProjectLoaded(result));
+        }
+
         public ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName)
         {
             return ExecuteOperation(c => c.ExecuteScriptForDebugging(assemblyName, className, methodName));

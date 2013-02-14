@@ -76,9 +76,9 @@ namespace MyCoolApp
             ProjectManager.UnloadProject();
         }
 
-        private void OpenScriptingProjectToolStripMenuItemClick(object sender, EventArgs e)
+        private async void OpenScriptingProjectToolStripMenuItemClick(object sender, EventArgs e)
         {
-            ScriptingService.LoadScriptingProject();
+            await ScriptingService.LoadScriptingProjectAsync();
         }
 
         private void SetTitle(string title)

@@ -4,7 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.Threading;
+using System.Threading.Tasks;
 using Caliburn.Micro;
+using MyCoolApp.Diagnostics;
 using MyCoolApp.Events;
 using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Projects;
@@ -20,6 +23,7 @@ namespace MyCoolApp.Development
         IHandle<ProjectUnloaded>,
         IHandle<DevelopmentEnvironmentConnected>,
         IHandle<DevelopmentEnvironmentDisconnected>,
+        IHandle<ScriptingProjectLoadedInDevelopmentEnvironment>,
         IHandle<ScriptingProjectUnloadedInDevelopmentEnvironment>
     {
         public static readonly SharpDevelopIntegrationService Instance =
@@ -27,8 +31,9 @@ namespace MyCoolApp.Development
                 new ChannelFactory<IRemoteControl>(new NetNamedPipeBinding()),
                 new HostApplicationServiceHost(),
                 new ScriptingProjectBuilder(),
-                ProjectManager.Instance, 
-                Program.GlobalEventAggregator);
+                ProjectManager.Instance,
+                Program.GlobalEventAggregator,
+                Logger.Instance);
 
         private const string SharpDevelopExecutablePath = "SharpDevelop\\bin\\SharpDevelop.exe";
         private readonly IChannelFactory<IRemoteControl> _channelFactory;
@@ -36,28 +41,32 @@ namespace MyCoolApp.Development
         private readonly IScriptingProjectBuilder _scriptingProjectBuilder;
         private readonly IProjectManager _projectManager;
         private readonly IEventAggregator _globalEventAggregator;
-        private Action<IRemoteControl> _operationToRunAfterDevelopmentEnvironmentIsLoaded;
+        private readonly ILogger _logger;
         private Process _sharpDevelopProcess;
 
-        public string RemoteControlUri { get; set; }
+        public string RemoteControlUri { get; private set; }
         public bool IsConnectionEstablished { get { return RemoteControlUri != null; } }
+
+        private LoadScriptingProjectResult _loadScriptingProjectResult;
 
         public SharpDevelopIntegrationService(
             IChannelFactory<IRemoteControl> channelFactory,
             IHostApplicationServiceHost hostApplicationServiceHost,
             IScriptingProjectBuilder scriptingProjectBuilder,
             IProjectManager projectManager,
-            IEventAggregator globalEventAggregator)
+            IEventAggregator globalEventAggregator,
+            ILogger logger)
         {
             _channelFactory = channelFactory;
             _hostApplicationServiceHost = hostApplicationServiceHost;
             _scriptingProjectBuilder = scriptingProjectBuilder;
             _projectManager = projectManager;
             _globalEventAggregator = globalEventAggregator;
+            _logger = logger;
             _globalEventAggregator.Subscribe(this);
         }
 
-        public void LoadScriptingProject(Project project, Action<IRemoteControl> whenProjectHasLoaded = null)
+        public async Task<LoadScriptingProjectResult> LoadScriptingProjectAsync(Project project)
         {
             var scriptingProjectFilePath = project.ScriptingProjectFilePath;
             var scriptingProjectName = project.Name;
@@ -67,17 +76,30 @@ namespace MyCoolApp.Development
                 _scriptingProjectBuilder.BuildScriptingProject(scriptingProjectName, scriptingProjectFilePath);
             }
 
-            if (IsConnectionEstablished)
-            {
-                ExecuteOperation(c => c.LoadScriptingProject(scriptingProjectFilePath));
-            }
-            else
-            {
-                StartDevelopmentEnvironment();
-            }
+            await StartDevelopmentEnvironment();
+            var result = await LoadProjectInDevelopmentEnvironment(scriptingProjectFilePath);
+            return result;
         }
 
-        private void StartDevelopmentEnvironment()
+        private async Task<LoadScriptingProjectResult> LoadProjectInDevelopmentEnvironment(string scriptingProjectFilePath)
+        {
+            var client = _channelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
+            client.LoadScriptingProject(scriptingProjectFilePath);
+
+            // I can't seem to get a reliable synchronous response from the result of a Build in SharpDevelop
+            // Instead I will wait asynchronously... with some sleeping.
+            while (_loadScriptingProjectResult == null)
+            {
+                _logger.Info("Waiting for project to load and finish building...");
+                await SleepAsync(1000);
+            }
+
+            var result = _loadScriptingProjectResult;
+            _loadScriptingProjectResult = null;
+            return result;
+        }
+
+        private async Task StartDevelopmentEnvironment()
         {
             if (IsConnectionEstablished) return;
 
@@ -87,13 +109,28 @@ namespace MyCoolApp.Development
 
             _sharpDevelopProcess.EnableRaisingEvents = true;
             _sharpDevelopProcess.Exited += SharpDevelopProcessExited;
+
+            while (IsConnectionEstablished == false)
+            {
+                _logger.Info("Waiting for development environment to finish starting...");
+                await SleepAsync(1000);
+            }
+        }
+
+        public Task SleepAsync(int millisecondsTimeout)
+        {
+            TaskCompletionSource<bool> tcs = null;
+            var t = new Timer(unusedState => tcs.TrySetResult(true), null, -1, -1);
+            tcs = new TaskCompletionSource<bool>(t);
+            t.Change(millisecondsTimeout, -1);
+            return tcs.Task;
         }
 
         private string BuildSharpDevelopArgumentString()
         {
             var args = new List<string>
                            {
-                               string.Format(_projectManager.Project.ScriptingProjectFilePath),
+                               //string.Format(_projectManager.Project.ScriptingProjectFilePath),
                                string.Format(
                                    Constant.HostApplicationListenUriParameterFormat,
                                    _hostApplicationServiceHost.ListenUri),
@@ -110,21 +147,6 @@ namespace MyCoolApp.Development
             return Path.Combine(Environment.CurrentDirectory, SharpDevelopExecutablePath);
         }
 
-        private void ExecuteOperation(Action<IRemoteControl> operation)
-        {
-            if (IsConnectionEstablished)
-            {
-                var client = _channelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
-                operation(client);
-            }
-            else
-            {
-                // Queue it to run when the IDE starts
-                _operationToRunAfterDevelopmentEnvironmentIsLoaded = operation;
-                StartDevelopmentEnvironment();
-            }
-        }
-
         private void SetRemoteControlUri(string remoteControlUri)
         {
             RemoteControlUri = remoteControlUri;
@@ -134,7 +156,8 @@ namespace MyCoolApp.Development
         {
             if (IsConnectionEstablished)
             {
-                ExecuteOperation(c => c.LoadScriptingProject(message.LoadedProject.ScriptingProjectFilePath));
+                var client = _channelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
+                client.LoadScriptingProject(message.LoadedProject.ScriptingProjectFilePath);
             }
         }
 
@@ -146,13 +169,6 @@ namespace MyCoolApp.Development
         public void Handle(DevelopmentEnvironmentConnected message)
         {
             SetRemoteControlUri(message.ListenUri);
-
-            if (_operationToRunAfterDevelopmentEnvironmentIsLoaded != null)
-            {
-                var operation = _operationToRunAfterDevelopmentEnvironmentIsLoaded;
-                _operationToRunAfterDevelopmentEnvironmentIsLoaded = null;
-                ExecuteOperation(operation);
-            }
         }
 
         public void Handle(DevelopmentEnvironmentDisconnected message)
@@ -176,6 +192,14 @@ namespace MyCoolApp.Development
             }
         }
 
+        public void Handle(ScriptingProjectLoadedInDevelopmentEnvironment message)
+        {
+            if (message.Result.ScriptingProjectFilePath != _projectManager.Project.ScriptingProjectFilePath)
+                throw new Exception(string.Format("The loaded project doesn't match the expected one. Expected: {0} Actual {1}",
+                    _projectManager.Project.ScriptingProjectFilePath, message.Result.ScriptingProjectFilePath));
+            _loadScriptingProjectResult = message.Result;
+        }
+
         public void Handle(ScriptingProjectUnloadedInDevelopmentEnvironment message)
         {
             ShutDownDevelopmentEnvironmentSafely();
@@ -187,7 +211,8 @@ namespace MyCoolApp.Development
             {
                 try
                 {
-                    ExecuteOperation(c => c.ShutDown());
+                    var client = _channelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
+                    client.ShutDown();
                     SetRemoteControlUri(null);
                 }
                 catch

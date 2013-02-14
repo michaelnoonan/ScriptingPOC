@@ -43,9 +43,9 @@ namespace MyCoolApp.Scripting
             _globalEventAggregator.Subscribe(this);
         }
 
-        public void LoadScriptingProject()
+        public async Task LoadScriptingProjectAsync()
         {
-            _sharpDevelopIntegrationService.LoadScriptingProject(_projectManager.Project);
+            var result = await _sharpDevelopIntegrationService.LoadScriptingProjectAsync(_projectManager.Project);
         }
 
         public async Task<ScriptExecutionResult> ExecuteScriptAsync(string className)
