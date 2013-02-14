@@ -13,5 +13,8 @@ namespace SharpDevelopRemoteControl.Contracts
 
         [OperationContract]
         void ShutDown();
+
+        [OperationContract]
+        void StartDebuggingScript(string className);
     }
 }

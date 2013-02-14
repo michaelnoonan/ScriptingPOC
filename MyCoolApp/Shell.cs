@@ -84,7 +84,7 @@ namespace MyCoolApp
         private void SetTitle(string title)
         {
             Text = string.Format("{0} - {1} ({2})",
-                                 title, DefaultApplicationTitle, (Environment.Is64BitProcess ? "(x64)" : "(x86)"));
+                                 title, DefaultApplicationTitle, (Environment.Is64BitProcess ? "x64" : "x86"));
         }
 
         public new void Handle(ProjectLoaded message)
@@ -145,6 +145,16 @@ namespace MyCoolApp
             {
                 runScriptToolStripMenuItem.DropDownItems.Add(button);
             }
+
+            debugScriptToolStripMenuItem.DropDownItems.Clear();
+            var debugScriptButtons =
+                message.ScriptNames
+                       .Select(x => new ToolStripMenuItem(x, Resources.script_go, DebugScript))
+                       .ToArray();
+            foreach (var button in debugScriptButtons)
+            {
+                debugScriptToolStripMenuItem.DropDownItems.Add(button);
+            }
         }
 
         private async void ExecuteScript(object sender, EventArgs e)
@@ -161,6 +171,13 @@ namespace MyCoolApp
                 StatusLabel.Text = string.Format("Script execution failed after {0}: {1}",
                                                  result.ElapsedTime, result.FailureReason);
             }
+        }
+
+        private async void DebugScript(object sender, EventArgs e)
+        {
+            var scriptName = ((ToolStripMenuItem) sender).Text;
+            Logger.Info("Debug " + scriptName);
+            await ScriptingService.DebugScriptAsync(scriptName);
         }
 
         public new void Handle(LogInfoEvent message)
@@ -195,7 +212,11 @@ namespace MyCoolApp
             recalculateToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             runScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingProject;
-            if (ProjectManager.HasScriptingProject == false) runScriptToolStripMenuItem.DropDownItems.Clear();
+            if (ProjectManager.HasScriptingProject == false)
+            {
+                runScriptToolStripMenuItem.DropDownItems.Clear();
+                debugScriptToolStripMenuItem.DropDownItems.Clear();
+            }
             toggleOutputWindowButton.Checked = outputWindow.Visible;
         }
 

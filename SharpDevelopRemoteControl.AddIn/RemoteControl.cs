@@ -1,10 +1,14 @@
 ﻿using System.Linq;
 using System.ServiceModel;
-using System.Threading;
+using ICSharpCode.AvalonEdit.AddIn;
 using ICSharpCode.Core;
 using ICSharpCode.SharpDevelop;
+using ICSharpCode.SharpDevelop.Bookmarks;
+using ICSharpCode.SharpDevelop.Debugging;
 using ICSharpCode.SharpDevelop.Gui;
 using ICSharpCode.SharpDevelop.Project;
+using ICSharpCode.SharpDevelop.Project.Commands;
+using SharpDevelopRemoteControl.AddIn.Scripting;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace SharpDevelopRemoteControl.AddIn
@@ -49,12 +53,30 @@ namespace SharpDevelopRemoteControl.AddIn
             WorkbenchSingleton.MainWindow.Close();
         }
 
-        public void DebugScript(string className)
+        public void StartDebuggingScript(string className)
         {
             LoggingService.Info("Debug Script: " + className);
             var classToDebug = ParserService.AllProjectContents.Select(p => p.GetClass(className, 0)).FirstOrDefault(c => c != null);
             LoggingService.Info("Class to debug: " + (classToDebug != null ? classToDebug.FullyQualifiedName : "NOT FOUND!!!!"));
-            NavigationService.NavigateTo(classToDebug);
+            var methodToDebug = classToDebug.Methods.FirstOrDefault(m => m.Name == "Main");
+            NavigationService.NavigateTo(methodToDebug);
+            EnsureBreakpointAtCurrentLocation();
+            new DebugCurrentScriptCommand().Run();
+        }
+
+        private static void EnsureBreakpointAtCurrentLocation()
+        {
+            var activeView = (AvalonEditViewContent) WorkbenchSingleton.Workbench.ActiveViewContent;
+            var filename = activeView.PrimaryFileName;
+            var methodPosition = activeView.CodeEditor.ActiveTextEditorAdapter.Caret.Position;
+            var matchingBreakpoint =
+                BookmarkManager.GetBookmarks(filename)
+                               .OfType<BreakpointBookmark>()
+                               .FirstOrDefault(bp => bp.LineNumber == methodPosition.Line);
+            if (matchingBreakpoint == null)
+            {
+                new ToggleBreakpointCommand().Run();
+            }
         }
     }
 }

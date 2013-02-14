@@ -48,22 +48,23 @@
             this.statusConnectedToIDE = new System.Windows.Forms.ToolStripSplitButton();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.plannedActivitiesBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.plannedActivitiesGridView = new System.Windows.Forms.DataGridView();
+            this.outputWindow = new System.Windows.Forms.RichTextBox();
             this.plannedForDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.descriptionDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.isDirtyDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.outputWindow = new System.Windows.Forms.RichTextBox();
+            this.plannedActivitiesBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.debugScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuBar.SuspendLayout();
             this.ToolBar.SuspendLayout();
             this.StatusBar.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // MenuBar
@@ -140,7 +141,8 @@
             // 
             this.scriptingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.scriptingOpenProjectToolStripMenuItem,
-            this.runScriptToolStripMenuItem});
+            this.runScriptToolStripMenuItem,
+            this.debugScriptToolStripMenuItem});
             this.scriptingToolStripMenuItem.Name = "scriptingToolStripMenuItem";
             this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
             this.scriptingToolStripMenuItem.Text = "Scripting";
@@ -224,11 +226,6 @@
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
-            // plannedActivitiesBindingSource
-            // 
-            this.plannedActivitiesBindingSource.AllowNew = true;
-            this.plannedActivitiesBindingSource.DataSource = typeof(MyCoolApp.Model.PlannedActivityViewModel);
-            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -262,6 +259,20 @@
             this.plannedActivitiesGridView.Size = new System.Drawing.Size(863, 436);
             this.plannedActivitiesGridView.TabIndex = 8;
             // 
+            // outputWindow
+            // 
+            this.outputWindow.BackColor = System.Drawing.Color.Black;
+            this.outputWindow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.outputWindow.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.outputWindow.ForeColor = System.Drawing.Color.Lime;
+            this.outputWindow.Location = new System.Drawing.Point(0, 0);
+            this.outputWindow.Name = "outputWindow";
+            this.outputWindow.ReadOnly = true;
+            this.outputWindow.Size = new System.Drawing.Size(863, 122);
+            this.outputWindow.TabIndex = 7;
+            this.outputWindow.Text = "";
+            this.outputWindow.WordWrap = false;
+            // 
             // plannedForDataGridViewTextBoxColumn
             // 
             this.plannedForDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -287,19 +298,17 @@
             this.isDirtyDataGridViewCheckBoxColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.isDirtyDataGridViewCheckBoxColumn.Width = 45;
             // 
-            // outputWindow
+            // plannedActivitiesBindingSource
             // 
-            this.outputWindow.BackColor = System.Drawing.Color.Black;
-            this.outputWindow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.outputWindow.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.outputWindow.ForeColor = System.Drawing.Color.Lime;
-            this.outputWindow.Location = new System.Drawing.Point(0, 0);
-            this.outputWindow.Name = "outputWindow";
-            this.outputWindow.ReadOnly = true;
-            this.outputWindow.Size = new System.Drawing.Size(863, 122);
-            this.outputWindow.TabIndex = 7;
-            this.outputWindow.Text = "";
-            this.outputWindow.WordWrap = false;
+            this.plannedActivitiesBindingSource.AllowNew = true;
+            this.plannedActivitiesBindingSource.DataSource = typeof(MyCoolApp.Model.PlannedActivityViewModel);
+            // 
+            // debugScriptToolStripMenuItem
+            // 
+            this.debugScriptToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script_error;
+            this.debugScriptToolStripMenuItem.Name = "debugScriptToolStripMenuItem";
+            this.debugScriptToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.debugScriptToolStripMenuItem.Text = "Debug Script";
             // 
             // Shell
             // 
@@ -321,12 +330,12 @@
             this.ToolBar.PerformLayout();
             this.StatusBar.ResumeLayout(false);
             this.StatusBar.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesBindingSource)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.plannedActivitiesBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -359,6 +368,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn plannedForDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn descriptionDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewCheckBoxColumn isDirtyDataGridViewCheckBoxColumn;
+        private System.Windows.Forms.ToolStripMenuItem debugScriptToolStripMenuItem;
 
     }
 }

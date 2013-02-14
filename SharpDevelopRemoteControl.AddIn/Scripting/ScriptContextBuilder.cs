@@ -36,9 +36,9 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
 
             if (mainMethod == null)
             {
-                TaskService.Add(new ICSharpCode.SharpDevelop.Task(currentFileName,
-                                                                  "Which script do you want to run? Please move the text cursor inside a Module or Class with a Subroutine called 'Main' with no parameters.",
-                                                                  caretLocation.Column, caretLocation.Line, TaskType.Error));
+                TaskService.Add(new Task(currentFileName,
+                                         "Which script do you want to run? Please move the text cursor inside a Module or Class with a Subroutine called 'Main' with no parameters.",
+                                         caretLocation.Column, caretLocation.Line, TaskType.Error));
                 return false;
             }
 

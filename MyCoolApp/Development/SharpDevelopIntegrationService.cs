@@ -66,8 +66,19 @@ namespace MyCoolApp.Development
             _globalEventAggregator.Subscribe(this);
         }
 
-        public async Task<LoadScriptingProjectResult> LoadScriptingProjectAsync(Project project)
+        public async Task StartDebuggingScriptAsync(string className)
         {
+            var result = await LoadAndBuildScriptingProjectAsync();
+            if (result.IsProjectBuildingSuccessfully)
+            {
+                var client = _channelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
+                client.StartDebuggingScript(className);
+            }
+        }
+
+        public async Task<LoadScriptingProjectResult> LoadAndBuildScriptingProjectAsync()
+        {
+            var project = _projectManager.Project;
             var scriptingProjectFilePath = project.ScriptingProjectFilePath;
             var scriptingProjectName = project.Name;
 
@@ -173,17 +184,19 @@ namespace MyCoolApp.Development
 
         public void Handle(DevelopmentEnvironmentDisconnected message)
         {
-            SetRemoteControlUri(null);
+            ShutDownDevelopmentEnvironmentSafely();
         }
 
         private void SharpDevelopProcessExited(object sender, EventArgs e)
         {
+            if (IsConnectionEstablished)
+            {
+                _globalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
+            }
+
             try
             {
-                if (IsConnectionEstablished)
-                {
-                    _globalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
-                }
+                ShutDownDevelopmentEnvironmentSafely();
             }
             finally
             {
