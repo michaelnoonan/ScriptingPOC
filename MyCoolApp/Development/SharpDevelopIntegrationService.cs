@@ -13,73 +13,94 @@ using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Development
 {
-    public class SharpDevelopAdapter :
+    public class SharpDevelopIntegrationService :
+        ISharpDevelopIntegrationService,
         IDisposable,
         IHandle<ProjectLoaded>,
         IHandle<ProjectUnloaded>,
         IHandle<DevelopmentEnvironmentConnected>,
-        IHandle<DevelopmentEnvironmentDisconnected>, ISharpDevelopAdapter
+        IHandle<DevelopmentEnvironmentDisconnected>,
+        IHandle<ScriptingProjectUnloadedInDevelopmentEnvironment>
     {
-        public static readonly SharpDevelopAdapter Instance =
-            new SharpDevelopAdapter(
+        public static readonly SharpDevelopIntegrationService Instance =
+            new SharpDevelopIntegrationService(
                 new ChannelFactory<IRemoteControl>(new NetNamedPipeBinding()),
                 new HostApplicationServiceHost(),
                 new ScriptingProjectBuilder(),
+                ProjectManager.Instance, 
                 Program.GlobalEventAggregator);
 
         private const string SharpDevelopExecutablePath = "SharpDevelop\\bin\\SharpDevelop.exe";
         private readonly IChannelFactory<IRemoteControl> _channelFactory;
         private readonly IHostApplicationServiceHost _hostApplicationServiceHost;
         private readonly IScriptingProjectBuilder _scriptingProjectBuilder;
+        private readonly IProjectManager _projectManager;
         private readonly IEventAggregator _globalEventAggregator;
-        private Action<IRemoteControl> _actionToRunAfterSharpDevelopIsLoaded;
+        private Action<IRemoteControl> _operationToRunAfterDevelopmentEnvironmentIsLoaded;
         private Process _sharpDevelopProcess;
 
-        public string RemoteControlUri { get; private set; }
+        public string RemoteControlUri { get; set; }
         public bool IsConnectionEstablished { get { return RemoteControlUri != null; } }
 
-        public SharpDevelopAdapter(
+        public SharpDevelopIntegrationService(
             IChannelFactory<IRemoteControl> channelFactory,
             IHostApplicationServiceHost hostApplicationServiceHost,
             IScriptingProjectBuilder scriptingProjectBuilder,
+            IProjectManager projectManager,
             IEventAggregator globalEventAggregator)
         {
             _channelFactory = channelFactory;
             _hostApplicationServiceHost = hostApplicationServiceHost;
             _scriptingProjectBuilder = scriptingProjectBuilder;
+            _projectManager = projectManager;
             _globalEventAggregator = globalEventAggregator;
             _globalEventAggregator.Subscribe(this);
         }
 
-        public void StartDevelopmentEnvironment(string projectOrSolutionFilePath = null)
+        public void LoadScriptingProject(Project project, Action<IRemoteControl> whenProjectHasLoaded = null)
+        {
+            var scriptingProjectFilePath = project.ScriptingProjectFilePath;
+            var scriptingProjectName = project.Name;
+
+            if (File.Exists(scriptingProjectFilePath) == false)
+            {
+                _scriptingProjectBuilder.BuildScriptingProject(scriptingProjectName, scriptingProjectFilePath);
+            }
+
+            if (IsConnectionEstablished)
+            {
+                ExecuteOperation(c => c.LoadScriptingProject(scriptingProjectFilePath));
+            }
+            else
+            {
+                StartDevelopmentEnvironment();
+            }
+        }
+
+        private void StartDevelopmentEnvironment()
         {
             if (IsConnectionEstablished) return;
 
             _sharpDevelopProcess = Process.Start(
                 BuildSharpDevelopExecutablePath(),
-                BuildSharpDevelopArgumentString(projectOrSolutionFilePath));
+                BuildSharpDevelopArgumentString());
 
             _sharpDevelopProcess.EnableRaisingEvents = true;
             _sharpDevelopProcess.Exited += SharpDevelopProcessExited;
         }
 
-        private string BuildSharpDevelopArgumentString(string projectOrSolutionFilePath)
+        private string BuildSharpDevelopArgumentString()
         {
-            var args = new List<string>();
-            if (string.IsNullOrWhiteSpace(projectOrSolutionFilePath) == false)
-            {
-                args.Add(projectOrSolutionFilePath);
-            }
-
-            args.Add(
-                string.Format(
-                    Constant.HostApplicationListenUriParameterFormat,
-                    _hostApplicationServiceHost.ListenUri));
-
-            args.Add(
-                string.Format(
-                    Constant.HostApplicationProcessIdParameterFormat,
-                    Process.GetCurrentProcess().Id));
+            var args = new List<string>
+                           {
+                               string.Format(_projectManager.Project.ScriptingProjectFilePath),
+                               string.Format(
+                                   Constant.HostApplicationListenUriParameterFormat,
+                                   _hostApplicationServiceHost.ListenUri),
+                               string.Format(
+                                   Constant.HostApplicationProcessIdParameterFormat,
+                                   Process.GetCurrentProcess().Id)
+                           };
 
             return string.Join(" ", args);
         }
@@ -99,7 +120,7 @@ namespace MyCoolApp.Development
             else
             {
                 // Queue it to run when the IDE starts
-                _actionToRunAfterSharpDevelopIsLoaded = operation;
+                _operationToRunAfterDevelopmentEnvironmentIsLoaded = operation;
                 StartDevelopmentEnvironment();
             }
         }
@@ -109,14 +130,28 @@ namespace MyCoolApp.Development
             RemoteControlUri = remoteControlUri;
         }
 
+        public void Handle(ProjectLoaded message)
+        {
+            if (IsConnectionEstablished)
+            {
+                ExecuteOperation(c => c.LoadScriptingProject(message.LoadedProject.ScriptingProjectFilePath));
+            }
+        }
+
+        public void Handle(ProjectUnloaded message)
+        {
+            ShutDownDevelopmentEnvironmentSafely();
+        }
+
         public void Handle(DevelopmentEnvironmentConnected message)
         {
             SetRemoteControlUri(message.ListenUri);
-            if (_actionToRunAfterSharpDevelopIsLoaded != null)
+
+            if (_operationToRunAfterDevelopmentEnvironmentIsLoaded != null)
             {
-                var action = _actionToRunAfterSharpDevelopIsLoaded;
-                _actionToRunAfterSharpDevelopIsLoaded = null;
-                ExecuteOperation(action);
+                var operation = _operationToRunAfterDevelopmentEnvironmentIsLoaded;
+                _operationToRunAfterDevelopmentEnvironmentIsLoaded = null;
+                ExecuteOperation(operation);
             }
         }
 
@@ -141,50 +176,30 @@ namespace MyCoolApp.Development
             }
         }
 
-        public void Handle(ProjectLoaded message)
+        public void Handle(ScriptingProjectUnloadedInDevelopmentEnvironment message)
+        {
+            ShutDownDevelopmentEnvironmentSafely();
+        }
+
+        private void ShutDownDevelopmentEnvironmentSafely()
         {
             if (IsConnectionEstablished)
             {
-                ExecuteOperation(c => c.LoadScriptingProject(message.LoadedProject.ScriptingProjectFilePath));
-            }
-        }
-
-        public void Handle(ProjectUnloaded message)
-        {
-            ShutDownDevelopmentEnvironment();
-        }
-
-        public void LoadScriptingProject(Project project)
-        {
-            var scriptingProjectFilePath = project.ScriptingProjectFilePath;
-            var scriptingProjectName = project.Name;
-
-            if (File.Exists(scriptingProjectFilePath) == false)
-            {
-                _scriptingProjectBuilder.BuildScriptingProject(scriptingProjectName, scriptingProjectFilePath);
-            }
-
-            if (IsConnectionEstablished)
-            {
-                ExecuteOperation(c => c.LoadScriptingProject(scriptingProjectFilePath));
-            }
-            else
-            {
-                StartDevelopmentEnvironment(scriptingProjectFilePath);
-            }
-        }
-
-        public void ShutDownDevelopmentEnvironment()
-        {
-            if (IsConnectionEstablished)
-            {
-                ExecuteOperation(c => c.ShutDown());
+                try
+                {
+                    ExecuteOperation(c => c.ShutDown());
+                    SetRemoteControlUri(null);
+                }
+                catch
+                {
+                    // Deliberately ignore any exception here since the most likely one is the environment is already gone!
+                }
             }
         }
 
         public void Dispose()
         {
-            ShutDownDevelopmentEnvironment();
+            ShutDownDevelopmentEnvironmentSafely();
 
             if (_channelFactory != null)
             {

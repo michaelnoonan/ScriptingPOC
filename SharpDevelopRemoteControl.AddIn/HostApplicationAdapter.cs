@@ -3,6 +3,7 @@ using System.ServiceModel;
 using ICSharpCode.Core;
 using ICSharpCode.SharpDevelop;
 using ICSharpCode.SharpDevelop.Gui;
+using ICSharpCode.SharpDevelop.Project;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace SharpDevelopRemoteControl.AddIn
@@ -76,7 +77,8 @@ namespace SharpDevelopRemoteControl.AddIn
             if (IsEnabled)
             {
                 WorkbenchSingleton.WorkbenchCreated += AnnounceRemoteControlInterfaceIsReady;
-                WorkbenchSingleton.WorkbenchUnloaded += AnnounceRemoteControlInterfaceShuttingDown;
+                WorkbenchSingleton.WorkbenchUnloaded += AnnounceRemoteControlInterfaceShuttingDownSafely;
+                ProjectService.SolutionClosed += AnnounceSolutionClosed;
             }
         }
 
@@ -123,11 +125,24 @@ namespace SharpDevelopRemoteControl.AddIn
             ExecuteOperation(c => c.RemoteControlAvailable(listenUri));
         }
 
-        private void AnnounceRemoteControlInterfaceShuttingDown(object sender, EventArgs e)
+        private void AnnounceRemoteControlInterfaceShuttingDownSafely(object sender, EventArgs e)
         {
             try
             {
                 ExecuteOperation(c => c.DevelopmentEnvironmentShuttingDown());
+            }
+            catch
+            {
+                // Deliberately discard any exception on shutdown
+                // It's likely the host application has gone away...
+            }
+        }
+
+        private void AnnounceSolutionClosed(object sender, EventArgs eventArgs)
+        {
+            try
+            {
+                ExecuteOperation(c => c.ScriptingProjectUnloaded());
             }
             catch
             {

@@ -38,7 +38,7 @@ namespace MyCoolApp
 
         private static void ShutDown(object sender, EventArgs e)
         {
-            SharpDevelopAdapter.Instance.Dispose();
+            SharpDevelopIntegrationService.Instance.Dispose();
             HostApplicationServiceHost.Instance.Dispose();
         }
     }

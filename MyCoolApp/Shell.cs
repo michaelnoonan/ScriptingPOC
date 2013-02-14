@@ -27,10 +27,9 @@ namespace MyCoolApp
         IHandle<LogErrorEvent>
         
     {
-        private const string DefaultApplicationTitle = "Host Application";
+        private const string DefaultApplicationTitle = "My Cool Planner";
 
         public IProjectManager ProjectManager { get; set; }
-        public ISharpDevelopAdapter SharpDevelopAdapter { get; set; }
         public IScriptingService ScriptingService { get; set; }
         public ILogger Logger { get; set; }
 
@@ -40,7 +39,6 @@ namespace MyCoolApp
             Program.GlobalEventAggregator.Subscribe(this);
 
             ProjectManager = Projects.ProjectManager.Instance;
-            SharpDevelopAdapter = Development.SharpDevelopAdapter.Instance;
             ScriptingService = Scripting.ScriptingService.Instance;
             Logger = Diagnostics.Logger.Instance;
 
@@ -68,11 +66,6 @@ namespace MyCoolApp
             }
         }
 
-        private void OpenProjectToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            SharpDevelopAdapter.LoadScriptingProject(ProjectManager.Project);
-        }
-
         private void SaveProjectToolStripMenuItemClick(object sender, EventArgs e)
         {
             ProjectManager.SaveProject();
@@ -83,9 +76,15 @@ namespace MyCoolApp
             ProjectManager.UnloadProject();
         }
 
+        private void OpenScriptingProjectToolStripMenuItemClick(object sender, EventArgs e)
+        {
+            ScriptingService.LoadScriptingProject();
+        }
+
         private void SetTitle(string title)
         {
-            Text = title + (Environment.Is64BitProcess ? "(x64)" : "(x86)");
+            Text = string.Format("{0} - {1} ({2})",
+                                 title, DefaultApplicationTitle, (Environment.Is64BitProcess ? "(x64)" : "(x86)"));
         }
 
         public new void Handle(ProjectLoaded message)
@@ -121,7 +120,7 @@ namespace MyCoolApp
             if (IsDisposed) return;
             Invoke(new Action(() =>
                                   {
-                                      Logger.Info("Development environment shut down.");
+                                      Logger.Info("Development environment disconnected.");
                                       statusConnectedToIDE.Visible = false;
                                       statusNotConnectedToIDE.Visible = true;
                                       EvaluateCommands();
@@ -132,20 +131,20 @@ namespace MyCoolApp
         {
             if (IsDisposed) return;
 
-            Invoke(new Action(
-                       () =>
-                           {
-                               Logger.Info(string.Join(", ", message.ScriptNames));
-                               runScriptToolStripMenuItem.DropDownItems.Clear();
-                               var toolStripButtons =
-                                   message.ScriptNames
-                                          .Select(x => new ToolStripMenuItem(x, Resources.script_go, ExecuteScript))
-                                          .ToArray();
-                               foreach (var button in toolStripButtons)
-                               {
-                                   runScriptToolStripMenuItem.DropDownItems.Add(button);
-                               }
-                           }));
+            Invoke(new Action(() => LoadNewScriptingOptions(message)));
+        }
+
+        private void LoadNewScriptingOptions(ScriptingAssemblyLoaded message)
+        {
+            runScriptToolStripMenuItem.DropDownItems.Clear();
+            var runScriptButtons =
+                message.ScriptNames
+                       .Select(x => new ToolStripMenuItem(x, Resources.script_go, ExecuteScript))
+                       .ToArray();
+            foreach (var button in runScriptButtons)
+            {
+                runScriptToolStripMenuItem.DropDownItems.Add(button);
+            }
         }
 
         private async void ExecuteScript(object sender, EventArgs e)
@@ -197,7 +196,6 @@ namespace MyCoolApp
             scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             runScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingProject;
             if (ProjectManager.HasScriptingProject == false) runScriptToolStripMenuItem.DropDownItems.Clear();
-            debugScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingProject;
             toggleOutputWindowButton.Checked = outputWindow.Visible;
         }
 

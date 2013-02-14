@@ -41,7 +41,6 @@
             this.scriptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scriptingOpenProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.runScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.debugScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolBar = new System.Windows.Forms.ToolStrip();
             this.toggleOutputWindowButton = new System.Windows.Forms.ToolStripButton();
             this.StatusBar = new System.Windows.Forms.StatusStrip();
@@ -52,10 +51,10 @@
             this.plannedActivitiesBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.plannedActivitiesGridView = new System.Windows.Forms.DataGridView();
-            this.outputWindow = new System.Windows.Forms.RichTextBox();
             this.plannedForDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.descriptionDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.isDirtyDataGridViewCheckBoxColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.outputWindow = new System.Windows.Forms.RichTextBox();
             this.MenuBar.SuspendLayout();
             this.ToolBar.SuspendLayout();
             this.StatusBar.SuspendLayout();
@@ -141,8 +140,7 @@
             // 
             this.scriptingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.scriptingOpenProjectToolStripMenuItem,
-            this.runScriptToolStripMenuItem,
-            this.debugScriptToolStripMenuItem});
+            this.runScriptToolStripMenuItem});
             this.scriptingToolStripMenuItem.Name = "scriptingToolStripMenuItem";
             this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
             this.scriptingToolStripMenuItem.Text = "Scripting";
@@ -153,7 +151,7 @@
             this.scriptingOpenProjectToolStripMenuItem.Name = "scriptingOpenProjectToolStripMenuItem";
             this.scriptingOpenProjectToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.scriptingOpenProjectToolStripMenuItem.Text = "Open Scripting Project";
-            this.scriptingOpenProjectToolStripMenuItem.Click += new System.EventHandler(this.OpenProjectToolStripMenuItemClick);
+            this.scriptingOpenProjectToolStripMenuItem.Click += new System.EventHandler(this.OpenScriptingProjectToolStripMenuItemClick);
             // 
             // runScriptToolStripMenuItem
             // 
@@ -161,13 +159,6 @@
             this.runScriptToolStripMenuItem.Name = "runScriptToolStripMenuItem";
             this.runScriptToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.runScriptToolStripMenuItem.Text = "Run Script";
-            // 
-            // debugScriptToolStripMenuItem
-            // 
-            this.debugScriptToolStripMenuItem.Image = global::MyCoolApp.Properties.Resources.script_error;
-            this.debugScriptToolStripMenuItem.Name = "debugScriptToolStripMenuItem";
-            this.debugScriptToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
-            this.debugScriptToolStripMenuItem.Text = "Debug Script";
             // 
             // ToolBar
             // 
@@ -271,20 +262,6 @@
             this.plannedActivitiesGridView.Size = new System.Drawing.Size(863, 436);
             this.plannedActivitiesGridView.TabIndex = 8;
             // 
-            // outputWindow
-            // 
-            this.outputWindow.BackColor = System.Drawing.Color.Black;
-            this.outputWindow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.outputWindow.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.outputWindow.ForeColor = System.Drawing.Color.Lime;
-            this.outputWindow.Location = new System.Drawing.Point(0, 0);
-            this.outputWindow.Name = "outputWindow";
-            this.outputWindow.ReadOnly = true;
-            this.outputWindow.Size = new System.Drawing.Size(863, 122);
-            this.outputWindow.TabIndex = 7;
-            this.outputWindow.Text = "";
-            this.outputWindow.WordWrap = false;
-            // 
             // plannedForDataGridViewTextBoxColumn
             // 
             this.plannedForDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -309,6 +286,20 @@
             this.isDirtyDataGridViewCheckBoxColumn.ReadOnly = true;
             this.isDirtyDataGridViewCheckBoxColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.isDirtyDataGridViewCheckBoxColumn.Width = 45;
+            // 
+            // outputWindow
+            // 
+            this.outputWindow.BackColor = System.Drawing.Color.Black;
+            this.outputWindow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.outputWindow.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.outputWindow.ForeColor = System.Drawing.Color.Lime;
+            this.outputWindow.Location = new System.Drawing.Point(0, 0);
+            this.outputWindow.Name = "outputWindow";
+            this.outputWindow.ReadOnly = true;
+            this.outputWindow.Size = new System.Drawing.Size(863, 122);
+            this.outputWindow.TabIndex = 7;
+            this.outputWindow.Text = "";
+            this.outputWindow.WordWrap = false;
             // 
             // Shell
             // 
@@ -357,7 +348,6 @@
         private System.Windows.Forms.ToolStripButton toggleOutputWindowButton;
         private System.Windows.Forms.ToolStripMenuItem scheduleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recalculateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem debugScriptToolStripMenuItem;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.ToolStripDropDownButton statusNotConnectedToIDE;
         private System.Windows.Forms.ToolStripSplitButton statusConnectedToIDE;

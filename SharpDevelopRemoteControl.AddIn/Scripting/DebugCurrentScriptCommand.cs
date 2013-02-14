@@ -17,6 +17,7 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
 {
     public class DebugCurrentScriptCommand : AbstractCommand
     {
+
         public override void Run()
         {
             // Ensure everything is saved to disk before doing anything else

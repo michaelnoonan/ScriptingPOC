@@ -78,12 +78,13 @@
     <Compile Include="Development\HostApplicationServiceHost.cs" />
     <Compile Include="Development\HostApplicationService.cs" />
     <Compile Include="Development\IHostApplicationServiceHost.cs" />
-    <Compile Include="Development\ISharpDevelopAdapter.cs" />
-    <Compile Include="Development\SharpDevelopAdapter.cs" />
+    <Compile Include="Development\ISharpDevelopIntegrationService.cs" />
+    <Compile Include="Development\SharpDevelopIntegrationService.cs" />
     <Compile Include="Diagnostics\ILogger.cs" />
     <Compile Include="Diagnostics\Logger.cs" />
     <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentDisconnected.cs" />
     <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentConnected.cs" />
+    <Compile Include="Events\DevelopmentEnvironment\ScriptingProjectUnloadedInDevelopmentEnvironment.cs" />
     <Compile Include="Events\Diagnostics\LogErrorEvent.cs" />
     <Compile Include="Events\Diagnostics\LogInfoEvent.cs" />
     <Compile Include="Events\ProjectUnloaded.cs" />

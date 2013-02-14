@@ -13,5 +13,8 @@ namespace SharpDevelopRemoteControl.Contracts
 
         [OperationContract]
         ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName);
+
+        [OperationContract(IsOneWay = true)]
+        void ScriptingProjectUnloaded();
     }
 }

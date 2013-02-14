@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Caliburn.Micro;
+using MyCoolApp.Development;
 using MyCoolApp.Diagnostics;
 using MyCoolApp.Projects;
 using SharpDevelopRemoteControl.Contracts;
@@ -11,27 +12,40 @@ namespace MyCoolApp.Scripting
     {
         public static ScriptingService Instance =
             new ScriptingService(
+                ProjectManager.Instance,
+                SharpDevelopIntegrationService.Instance,
                 new ScriptingAssemblyLoader(ProjectManager.Instance, new ScriptingAssemblyFileWatcher(Program.GlobalEventAggregator), Program.GlobalEventAggregator, Logger.Instance),
                 new ScriptExecutor(Logger.Instance), 
                 Program.GlobalEventAggregator,
                 Logger.Instance);
 
+        private readonly IProjectManager _projectManager;
+        private readonly ISharpDevelopIntegrationService _sharpDevelopIntegrationService;
         private readonly IScriptingAssemblyLoader _scriptingAssemblyLoader;
         private readonly IEventAggregator _globalEventAggregator;
         private readonly IScriptExecutor _scriptExecutor;
         private readonly ILogger _logger;
 
         public ScriptingService(
+            IProjectManager projectManager,
+            ISharpDevelopIntegrationService sharpDevelopIntegrationService,
             IScriptingAssemblyLoader scriptingAssemblyLoader,
             IScriptExecutor scriptExecutor,
             IEventAggregator globalEventAggregator,
             ILogger logger)
         {
+            _projectManager = projectManager;
+            _sharpDevelopIntegrationService = sharpDevelopIntegrationService;
             _scriptingAssemblyLoader = scriptingAssemblyLoader;
             _globalEventAggregator = globalEventAggregator;
             _scriptExecutor = scriptExecutor;
             _logger = logger;
             _globalEventAggregator.Subscribe(this);
+        }
+
+        public void LoadScriptingProject()
+        {
+            _sharpDevelopIntegrationService.LoadScriptingProject(_projectManager.Project);
         }
 
         public async Task<ScriptExecutionResult> ExecuteScriptAsync(string className)
