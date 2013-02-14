@@ -2,18 +2,17 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using MyCoolApp.Diagnostics;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Scripting
 {
-    public class ScriptExecutor
+    public class ScriptExecutor : IScriptExecutor
     {
-        public static ScriptExecutor Instance = new ScriptExecutor(Logger.Instance);
-
-        private readonly Logger _logger;
+        private readonly ILogger _logger;
         private bool _currentlyExecuting;
 
-        public ScriptExecutor(Logger logger)
+        public ScriptExecutor(ILogger logger)
         {
             _logger = logger;
         }
@@ -26,9 +25,7 @@ namespace MyCoolApp.Scripting
 
         public Task<ScriptExecutionResult> ExecuteScriptAsync(Assembly assembly, string className, string methodName)
         {
-            AssertSingleScript();
-
-            return (Task<ScriptExecutionResult>) Task.Run(() => { ExecuteScript(assembly, className, methodName); });
+            return Task.Run(() => ExecuteScript(assembly, className, methodName));
         }
 
         public ScriptExecutionResult ExecuteScript(Assembly assembly, string className, string methodName)
@@ -39,7 +36,7 @@ namespace MyCoolApp.Scripting
             var declaringClass = assembly.GetType(className);
             if (declaringClass == null)
                 throw new Exception(
-                    string.Format("The class '{0}' is not available in the currently loaded scripting assembly: {1}",
+                    string.Format("The class '{0}' is not available in the scripting assembly: {1}",
                                   className, assembly.FullName));
 
             var method = declaringClass.GetMethod(methodName);

@@ -1,10 +1,12 @@
-﻿using ICSharpCode.Core;
+﻿using System.ServiceModel;
+using ICSharpCode.Core;
 using ICSharpCode.SharpDevelop.Gui;
 using ICSharpCode.SharpDevelop.Project;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace SharpDevelopRemoteControl.AddIn
 {
+    [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class RemoteControl : IRemoteControl
     {
         public void LogMessage(string message)

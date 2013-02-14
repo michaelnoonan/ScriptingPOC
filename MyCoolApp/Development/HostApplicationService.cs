@@ -1,3 +1,4 @@
+using System.ServiceModel;
 using Caliburn.Micro;
 using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Projects;
@@ -6,6 +7,7 @@ using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Development
 {
+    [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class HostApplicationService : IHostApplicationService
     {
         private readonly IEventAggregator _globalEventAggregator;

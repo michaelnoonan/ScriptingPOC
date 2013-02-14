@@ -2,10 +2,10 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Caliburn.Micro;
 using MyCoolApp.Development;
+using MyCoolApp.Diagnostics;
 using MyCoolApp.Events;
 using MyCoolApp.Events.DevelopmentEnvironment;
 using MyCoolApp.Events.Diagnostics;
@@ -23,7 +23,6 @@ namespace MyCoolApp
         IHandle<DevelopmentEnvironmentConnected>,
         IHandle<DevelopmentEnvironmentDisconnected>,
         IHandle<ScriptingAssemblyLoaded>,
-        IHandle<ScriptExecutionCompleted>,
         IHandle<LogInfoEvent>,
         IHandle<LogErrorEvent>
         
@@ -33,7 +32,7 @@ namespace MyCoolApp
         public IProjectManager ProjectManager { get; set; }
         public ISharpDevelopAdapter SharpDevelopAdapter { get; set; }
         public IScriptingService ScriptingService { get; set; }
-        public Logger Logger { get; set; }
+        public ILogger Logger { get; set; }
 
         public Shell()
         {
@@ -43,7 +42,7 @@ namespace MyCoolApp
             ProjectManager = Projects.ProjectManager.Instance;
             SharpDevelopAdapter = Development.SharpDevelopAdapter.Instance;
             ScriptingService = Scripting.ScriptingService.Instance;
-            Logger = Logger.Instance;
+            Logger = Diagnostics.Logger.Instance;
 
             Text = DefaultApplicationTitle;
             EvaluateCommands();
@@ -144,22 +143,20 @@ namespace MyCoolApp
                            }));
         }
 
-        private void ExecuteScript(object sender, EventArgs e)
+        private async void ExecuteScript(object sender, EventArgs e)
         {
             var scriptName = ((ToolStripMenuItem) sender).Text;
             Logger.Info("Execute " + scriptName);
-            ScriptingService.ExecuteScript(scriptName);
-        }
-
-        public new void Handle(ScriptExecutionCompleted message)
-        {
-            if (IsDisposed) return;
-
-            Invoke(new Action(
-                       () =>
-                       {
-                           StatusLabel.Text = "Execution complete in " + message.Result.ElapsedTime.ToString();
-                       }));
+            var result = await ScriptingService.ExecuteScriptAsync(scriptName);
+            if (result.Successful)
+            {
+                StatusLabel.Text = "Execution complete in " + result.ElapsedTime.ToString();
+            }
+            else
+            {
+                StatusLabel.Text = string.Format("Script execution failed after {0}: {1}",
+                                                 result.ElapsedTime, result.FailureReason);
+            }
         }
 
         public new void Handle(LogInfoEvent message)
@@ -190,6 +187,7 @@ namespace MyCoolApp
         private void EvaluateCommands()
         {
             closeProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
+            saveProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             recalculateToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             scriptingOpenProjectToolStripMenuItem.Enabled = ProjectManager.IsProjectLoaded;
             runScriptToolStripMenuItem.Enabled = ProjectManager.HasScriptingProject;
@@ -208,7 +206,7 @@ namespace MyCoolApp
             
             //if (keyData == Keys.F5)
             //{
-            //    ExecuteScript(ScriptTextBox.Text);
+            //    ExecuteScriptAsync(ScriptTextBox.Text);
             //    return false;
             //}
 

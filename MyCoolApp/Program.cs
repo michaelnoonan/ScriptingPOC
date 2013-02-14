@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Caliburn.Micro;
 using MyCoolApp.Development;
+using MyCoolApp.Diagnostics;
 
 namespace MyCoolApp
 {

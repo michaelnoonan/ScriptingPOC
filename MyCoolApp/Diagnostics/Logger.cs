@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using MyCoolApp.Events.Diagnostics;
 
-namespace MyCoolApp
+namespace MyCoolApp.Diagnostics
 {
-    public class Logger
+    public class Logger : ILogger
     {
         public static Logger Instance = new Logger();
 
