@@ -8,7 +8,6 @@
 
 
   <ItemGroup>
-    <SharpDevelopCustomizationFile Include="ICSharpCode.SharpDevelop.addin" />
     <SharpDevelopBinFiles Include="$(SolutionDir)\SharpDevelop\bin\**" />
     <SharpDevelopDataFiles Include="$(SolutionDir)\SharpDevelop\data\**" />
     <SharpDevelopAddInFiles Include="$(AddInsSourceDir)\*.addin" />
@@ -20,12 +19,12 @@
     <SharpDevelopMiscAddIns Include="$(AddInsSourceDir)\Misc\**" Exclude="$(AddInsSourceDir)\Misc\TextTemplating\**;$(AddInsSourceDir)\Misc\UsageDataCollector\**;$(AddInsSourceDir)\Misc\HelpViewer\**" />
     <RemoteControlAddin Include="$(SolutionDir)\SharpDevelopRemoteControl.AddIn\bin\Debug\**" />
     <SharpDevelopDocFiles Include="$(SolutionDir)\SharpDevelop\doc\**" />
+    <SharpDevelopCustomizationFile Include="ICSharpCode.SharpDevelop.addin" />
   </ItemGroup>
 
   <Target Name="CopyFiles" BeforeTargets="Build">
     <Exec Command="RMDIR /S /Q $(SharpDevelopTargetPath)" />
     <Error Condition="'@(SharpDevelopBinFiles)' == ''" Text="SharpDevelop project has not been built." />
-    <Copy SourceFiles="@(SharpDevelopCustomizationFile)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopBinFiles)" DestinationFolder="$(SharpDevelopTargetPath)\bin\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopDataFiles)" DestinationFolder="$(SharpDevelopTargetPath)\data\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopAddInFiles)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\%(RecursiveDir)" SkipUnchangedFiles="true" />
@@ -37,6 +36,7 @@
     <Copy SourceFiles="@(SharpDevelopMiscAddIns)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\Misc\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(RemoteControlAddin)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns\Runge\RemoteControl\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SharpDevelopDocFiles)" DestinationFolder="$(SharpDevelopTargetPath)\doc\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SharpDevelopCustomizationFile)" DestinationFolder="$(SharpDevelopTargetPath)\AddIns" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

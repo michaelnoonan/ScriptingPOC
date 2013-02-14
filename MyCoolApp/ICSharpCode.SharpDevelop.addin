@@ -366,20 +366,22 @@
 		<MenuItem id = "OpenCommandPromptHere"
 		          label = "${res:OpenFileTabEventHandler.OpenCommandPromptHere}"
 		          class = "ICSharpCode.SharpDevelop.Project.Commands.OpenCommandPromptHere"/>
-		<Condition name="IsProcessRunning" isprocessrunning="False" isdebugging="False" action="Disable">
+<!--
+    <Condition name="IsProcessRunning" isprocessrunning="False" isdebugging="False" action="Disable">
 			<MenuItem id          = "Run"
 			          label       = "${res:ProjectComponent.ContextMenu.RunProject}"
 			          icon        = "Icons.16x16.RunProgramIcon"
 			          class       = "ICSharpCode.SharpDevelop.Project.Commands.RunProject"/>
 		</Condition>
-		<MenuItem id          = "RunWithoutDebugger"
+    <MenuItem id          = "RunWithoutDebugger"
 		          label       = "${res:ProjectComponent.ContextMenu.RunProjectWithoutDebugger}"
 		          icon        = "Icons.16x16.Debug.StartWithoutDebugging"
 		          class       = "ICSharpCode.SharpDevelop.Project.Commands.RunProjectWithoutDebugger"/>
 		<MenuItem id    = "SetAsStartupProject"
 		          label = "${res:ProjectComponent.ContextMenu.SetAsStartupProject}"
 		          class = "ICSharpCode.SharpDevelop.Project.Commands.SetAsStartupProject"/>
-		<MenuItem id = "Convert"
+-->
+    <MenuItem id = "Convert"
 		          label = "${res:ICSharpCode.SharpDevelop.Commands.Convert}"
 		          type  = "Menu">
 			<!-- elements are added by backend bindings -->
@@ -1003,15 +1005,17 @@
 		             class   = "ICSharpCode.SharpDevelop.Project.Commands.BuildProject"/>
 		
 		<ToolbarItem id = "DebuggerSeparator" type = "Separator"  />
-		
-		<ComplexCondition>
+
+<!--
+    <ComplexCondition>
 			<Or>
 				<Condition name="IsProcessRunning" isdebugging = "False"/>
 				<Not>
 					<Condition name="DebuggerSupports" debuggersupports = "ExecutionControl"/>
 				</Not>
 			</Or>
-			<Condition name="IsProcessRunning" isdebugging = "False" action = "Disable">
+
+      <Condition name="IsProcessRunning" isdebugging = "False" action = "Disable">
 				<Condition name = "SolutionOpen" action = "Disable">
 					<Condition name="DebuggerSupports" debuggersupports = "Start">
 						<ToolbarItem id      = "Run"
@@ -1029,7 +1033,7 @@
 				</Condition>
 			</Condition>
 		</ComplexCondition>
-		
+-->		
 		<Condition name="IsProcessRunning" isdebugging = "True">
 			<Condition name="DebuggerSupports" debuggersupports = "ExecutionControl">
 				<Condition name="IsProcessRunning" isprocessrunning = "False" action = "Disable">
@@ -1627,7 +1631,8 @@
 		</MenuItem> <!-- end BUILD menu -->
 		
 		<MenuItem id = "Debug" label = "${res:XML.MainMenu.DebugMenu}" type="Menu">
-			<Condition name="DebuggerSupports" debuggersupports = "Start">
+<!--
+      <Condition name="DebuggerSupports" debuggersupports = "Start">
 				<Condition name = "SolutionOpen" action="Disable">
 					<Condition name="IsProcessRunning" isdebugging="False" action="Disable">
 						<MenuItem id       = "Run"
@@ -1659,8 +1664,8 @@
 					          class    = "ICSharpCode.SharpDevelop.Project.Commands.ExecuteLastBuild"/>
 				</Condition>
 			</Condition>
-
-      <Condition name="DebuggerSupports" debuggersupports = "Stop">
+-->
+			<Condition name="DebuggerSupports" debuggersupports = "Stop">
 				<Condition name="IsProcessRunning" isdebugging="True" action="Disable">
 					<MenuItem id    = "Stop"
 					          label = "${res:XML.MainMenu.DebugMenu.Stop}"

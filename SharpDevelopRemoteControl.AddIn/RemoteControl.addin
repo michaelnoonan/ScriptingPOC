@@ -2,25 +2,56 @@
        author      = "Michael Noonan"
        description = "Enables another application to control SharpDevelop remotely"
        addInManagerHidden = "preinstalled">
-	
-	<Manifest>
-		<Identity name = "RemoteControl"/>
-	</Manifest>
-	
-	<Runtime>
-		<Import assembly = "SharpDevelopRemoteControl.AddIn.dll"/>
-	</Runtime>
-	
-	<Path name = "/Workspace/Autostart">
-		<Class id    = "RemoteControl"
-			      class = "SharpDevelopRemoteControl.AddIn.AutoStartCommand"/>
-	</Path>
 
+  <Manifest>
+    <Identity name = "RemoteControl"/>
+  </Manifest>
+
+  <Runtime>
+    <Import assembly = "SharpDevelopRemoteControl.AddIn.dll"/>
+  </Runtime>
+
+  <Path name = "/Workspace/Autostart">
+    <Class id    = "RemoteControl"
+			      class = "SharpDevelopRemoteControl.AddIn.AutoStartCommand"/>
+  </Path>
+
+  <Path name = "/SharpDevelop/Workbench/MainMenu">
+    <MenuItem id = "Debug" label = "${res:XML.MainMenu.DebugMenu}" type="Menu">
+      <Condition name="DebuggerSupports" debuggersupports = "Start">
+        <Condition name = "SolutionOpen" action="Disable">
+          <Condition name="IsProcessRunning" isdebugging="False" action="Disable">
+            <MenuItem id       = "DebugCurrentScript"
+                      insertbefore = "Stop"
+						          label    = "Run current script"
+						          icon     = "Icons.16x16.RunProgramIcon"
+						          shortcut = "F5"
+						          class    = "SharpDevelopRemoteControl.AddIn.Scripting.DebugCurrentScriptCommand"/>
+          </Condition>
+        </Condition>
+      </Condition>
+    </MenuItem>
+  </Path>
   <Path name = "/SharpDevelop/Workbench/ToolBar/Standard">
-    <ToolbarItem id = "ScriptingSeparator" type = "Separator" />
-    <ToolbarItem id      = "DebugCurrentScript"
-		             icon    = "Icons.16x16.RunProgramIcon"
-		             tooltip = "Debug Current Script"
-		             class   = "SharpDevelopRemoteControl.AddIn.Scripting.DebugCurrentScriptCommand"/>
+    <ComplexCondition>
+      <Or>
+        <Condition name="IsProcessRunning" isdebugging = "False"/>
+        <Not>
+          <Condition name="DebuggerSupports" debuggersupports = "ExecutionControl"/>
+        </Not>
+      </Or>
+
+      <Condition name="IsProcessRunning" isdebugging = "False" action = "Disable">
+        <Condition name = "SolutionOpen" action = "Disable">
+          <Condition name="DebuggerSupports" debuggersupports = "Start">
+            <ToolbarItem id      = "DebugCurrentScript"
+                         insertbefore = "Continue"
+                         icon    = "Icons.16x16.RunProgramIcon"
+                         tooltip = "Run current script"
+                         class   = "SharpDevelopRemoteControl.AddIn.Scripting.DebugCurrentScriptCommand"/>
+          </Condition>
+        </Condition>
+      </Condition>
+    </ComplexCondition>
   </Path>
 </AddIn>
