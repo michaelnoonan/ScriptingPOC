@@ -58,8 +58,9 @@ namespace MyCoolApp
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
+            cancelButton.Enabled = false;
+            cancelButton.Text = "Cancelling...";
             _cancellationTokenSource.Cancel();
-            NotBusyAnymore();
         }
     }
 }

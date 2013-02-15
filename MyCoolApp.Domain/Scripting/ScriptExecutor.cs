@@ -15,6 +15,7 @@ namespace MyCoolApp.Domain.Scripting
         private readonly IProjectManager _projectManager;
         private readonly ILogger _logger;
         private bool _currentlyExecuting;
+        private Timer _forcedCancellationTimer;
 
         public ScriptExecutor(IProjectManager projectManager, ILogger logger)
         {
@@ -52,10 +53,10 @@ namespace MyCoolApp.Domain.Scripting
                     string.Format("The method '{0}' should be static and have no parameters.", method.Name));
 
             InjectProperties(declaringClass, cancellation);
-            await InvokeMethodAsync(method);
+            return await InvokeMethodAsync(method, cancellation);
         }
 
-        private async Task<ScriptExecutionResult> InvokeMethodAsync(MethodInfo method)
+        private async Task<ScriptExecutionResult> InvokeMethodAsync(MethodInfo method, CancellationToken cancellation)
         {
             var startedAt = DateTime.MinValue;
             try
@@ -63,7 +64,7 @@ namespace MyCoolApp.Domain.Scripting
                 startedAt = DateTime.Now;
                 try
                 {
-                    await Task.Run(() => method.Invoke(null, null));
+                    await Task.Run(() => InvokeMethodWithCancellation(method, cancellation));
                 }
                 catch (TargetInvocationException tie)
                 {
@@ -73,6 +74,11 @@ namespace MyCoolApp.Domain.Scripting
                         return ScriptExecutionResult.Cancelled(DateTime.Now - startedAt);
                     }
                     throw;
+                }
+                catch (ThreadAbortException)
+                {
+                    _logger.Info("The script had to be aborted since it didn't cancel gracefully.");
+                    return ScriptExecutionResult.Cancelled(DateTime.Now - startedAt);
                 }
                 return ScriptExecutionResult.Success(DateTime.Now - startedAt);
             }
@@ -85,6 +91,35 @@ namespace MyCoolApp.Domain.Scripting
             {
                 _currentlyExecuting = false;
             }
+        }
+
+        private void InvokeMethodWithCancellation(MethodInfo method, CancellationToken cancellation)
+        {
+            DateTime? cancellationFirstRequested = null;
+
+            _forcedCancellationTimer = new Timer(
+                state =>
+                    {
+                        if (cancellation.IsCancellationRequested)
+                        {
+                            if (cancellationFirstRequested == null)
+                            {
+                                _logger.Info("Cancellation has been requested, waiting for the script to stop gracefully...");
+                                cancellationFirstRequested = DateTime.Now;
+                            }
+
+                            if (DateTime.Now - cancellationFirstRequested > TimeSpan.FromSeconds(20))
+                            {
+                                _forcedCancellationTimer.Dispose();
+                                _forcedCancellationTimer = null;
+                                ((Thread)state).Abort();
+                                return;
+                            }
+                        }
+
+                        _forcedCancellationTimer.Change(5000, -1);
+                    }, Thread.CurrentThread, 5000, -1);
+            method.Invoke(null, null);
         }
 
         private void InjectProperties(Type declaringClass, CancellationToken cancellation)
