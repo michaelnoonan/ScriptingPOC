@@ -28,12 +28,7 @@ namespace MyCoolApp.Domain.Scripting
                 throw new InvalidOperationException("A script is currently executing - only one script can execute at a time.");
         }
 
-        public Task<ScriptExecutionResult> ExecuteScriptAsync(Assembly assembly, string className, string methodName, CancellationToken cancellation = new CancellationToken())
-        {
-            return Task.Run(() => ExecuteScript(assembly, className, methodName), cancellation);
-        }
-
-        private ScriptExecutionResult ExecuteScript(Assembly assembly, string className, string methodName)
+        public async Task<ScriptExecutionResult> ExecuteScriptAsync(Assembly assembly, string className, string methodName, CancellationToken cancellation = new CancellationToken())
         {
             if (assembly == null) throw new ArgumentNullException("assembly");
 
@@ -56,29 +51,45 @@ namespace MyCoolApp.Domain.Scripting
                 throw new Exception(
                     string.Format("The method '{0}' should be static and have no parameters.", method.Name));
 
-            InjectProperties(declaringClass);
+            InjectProperties(declaringClass, cancellation);
+            await InvokeMethodAsync(method);
+        }
 
+        private async Task<ScriptExecutionResult> InvokeMethodAsync(MethodInfo method)
+        {
             var startedAt = DateTime.MinValue;
-            var completedAt = DateTime.MinValue;
             try
             {
                 startedAt = DateTime.Now;
-                method.Invoke(null, null);
-                completedAt = DateTime.Now;
-                _currentlyExecuting = false;
-                return ScriptExecutionResult.Success(completedAt - startedAt);
+                try
+                {
+                    await Task.Run(() => method.Invoke(null, null));
+                }
+                catch (TargetInvocationException tie)
+                {
+                    if (tie.InnerException is OperationCanceledException)
+                    {
+                        _logger.Info("The script was cancelled.");
+                        return ScriptExecutionResult.Cancelled(DateTime.Now - startedAt);
+                    }
+                    throw;
+                }
+                return ScriptExecutionResult.Success(DateTime.Now - startedAt);
             }
             catch (Exception e)
             {
-                completedAt = DateTime.Now;
-                _currentlyExecuting = false;
                 _logger.Error(e, "The script failed with an exception.");
-                return ScriptExecutionResult.Failed(e.Message, completedAt - startedAt);
+                return ScriptExecutionResult.Failed(e.Message, DateTime.Now - startedAt);
+            }
+            finally
+            {
+                _currentlyExecuting = false;
             }
         }
 
-        private void InjectProperties(Type declaringClass)
+        private void InjectProperties(Type declaringClass, CancellationToken cancellation)
         {
+            Inject<CancellationToken>(declaringClass, cancellation);
             Inject<ILogger>(declaringClass, _logger);
             Inject<ISchedule>(declaringClass, new ScheduleAdapter(_projectManager.Project.Schedule));
         }

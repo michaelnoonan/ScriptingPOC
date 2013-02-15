@@ -113,7 +113,7 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
             var result = completedTask.Result;
             if (result != null)
             {
-                if (result.Successful == false)
+                if (result.IsSuccessful == false)
                 {
                     LogError(context, result.FailureReason);
                     WorkbenchSingleton.StatusBar.SetMessage("The script failed after running for " + result.ElapsedTime.ToString());

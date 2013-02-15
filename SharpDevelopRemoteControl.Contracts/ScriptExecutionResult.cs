@@ -11,25 +11,33 @@ namespace SharpDevelopRemoteControl.Contracts
             
         }
 
-        protected ScriptExecutionResult(bool successful, string failureReason, TimeSpan elapsedTime)
+        protected ScriptExecutionResult(bool isSuccessful, bool isCancelled, string failureReason, TimeSpan elapsedTime)
         {
-            Successful = successful;
+            IsSuccessful = isSuccessful;
+            IsCancelled = isCancelled;
             FailureReason = failureReason;
             ElapsedTime = elapsedTime;
         }
 
         public static ScriptExecutionResult Success(TimeSpan elapsedTime)
         {
-            return new ScriptExecutionResult(true, null, elapsedTime);
+            return new ScriptExecutionResult(true, false, null, elapsedTime);
+        }
+
+        public static ScriptExecutionResult Cancelled(TimeSpan elapsedTime)
+        {
+            return new ScriptExecutionResult(false, true, null, elapsedTime);
         }
 
         public static ScriptExecutionResult Failed(string failureReason, TimeSpan elapsedTime)
         {
-            return new ScriptExecutionResult(false, failureReason, elapsedTime);
+            return new ScriptExecutionResult(false, false, failureReason, elapsedTime);
         }
 
         [DataMember]
-        public bool Successful { get; private set; }
+        public bool IsSuccessful { get; private set; }
+        [DataMember]
+        public bool IsCancelled { get; private set; }
         [DataMember]
         public string FailureReason { get; private set; }
         [DataMember]

@@ -1,14 +1,24 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace MyCoolApp
 {
     public partial class Busy : Form
     {
+        private readonly CancellationTokenSource _cancellationTokenSource;
+
         public Busy()
         {
             InitializeComponent();
+        }
+
+        public Busy(string message, CancellationTokenSource cancellationTokenSource)
+            : this()
+        {
+            _cancellationTokenSource = cancellationTokenSource;
+            SetMessage(message);
         }
 
         protected override void OnShown(EventArgs e)
@@ -20,9 +30,11 @@ namespace MyCoolApp
                 this.Location = p;
             }
         }
+
         private void Busy_Load(object sender, EventArgs e)
         {
             progressBar1.Style = ProgressBarStyle.Marquee;
+            cancelButton.Visible = _cancellationTokenSource != null;
         }
 
         private bool shouldClose = false;
@@ -42,6 +54,12 @@ namespace MyCoolApp
         {
             shouldClose = true;
             Close();
+        }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            _cancellationTokenSource.Cancel();
+            NotBusyAnymore();
         }
     }
 }

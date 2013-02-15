@@ -211,8 +211,16 @@ namespace MyCoolApp
         {
             var scriptName = ((ToolStripMenuItem) sender).Text;
             Logger.Info("Execute " + scriptName);
-            var result = await ScriptingService.ExecuteScriptAsync(scriptName);
-            if (result.Successful)
+            var cts = new CancellationTokenSource();
+            var busy = new Busy("Executing script " + scriptName, cts);
+            busy.Show(this);
+            var result = await ScriptingService.ExecuteScriptAsync(scriptName, cts.Token);
+            busy.NotBusyAnymore();
+            if (result.IsCancelled)
+            {
+                StatusLabel.Text = "Execution cancelled after " + result.ElapsedTime.ToString();
+            }
+            else if (result.IsSuccessful)
             {
                 StatusLabel.Text = "Execution complete in " + result.ElapsedTime.ToString();
             }

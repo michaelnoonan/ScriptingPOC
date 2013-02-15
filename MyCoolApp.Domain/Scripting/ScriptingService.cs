@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using MyCoolApp.Domain.Development;
@@ -44,12 +45,11 @@ namespace MyCoolApp.Domain.Scripting
             var result = await _sharpDevelopIntegrationService.LoadAndBuildScriptingProjectAsync();
         }
 
-        public async Task<ScriptExecutionResult> ExecuteScriptAsync(string className)
+        public async Task<ScriptExecutionResult> ExecuteScriptAsync(string className, CancellationToken cancellation)
         {
             if (_scriptingAssemblyLoader.CurrentScriptingAssembly == null)
                 throw new InvalidOperationException("There is no scripting assembly loaded.");
-
-            var result = await _scriptExecutor.ExecuteScriptAsync(_scriptingAssemblyLoader.CurrentScriptingAssembly, className, "Main");
+            var result = await _scriptExecutor.ExecuteScriptAsync(_scriptingAssemblyLoader.CurrentScriptingAssembly, className, "Main", cancellation);
             return result;
         }
 
