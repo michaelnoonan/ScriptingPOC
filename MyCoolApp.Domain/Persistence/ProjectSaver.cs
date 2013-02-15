@@ -10,7 +10,7 @@ namespace MyCoolApp.Domain.Persistence
         {
             var projectData = new ProjectData();
 
-            foreach (var a in projectToSave.PlannedActivities)
+            foreach (var a in projectToSave.Schedule.PlannedActivities)
             {
                 projectData.PlannedActivities.Add(new PlannedActivity(a.PlannedFor, a.Description));
             }

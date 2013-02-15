@@ -16,6 +16,7 @@ namespace MyCoolApp.Domain.Scripting
 {
     public class ScriptingAssemblyLoader :
         IScriptingAssemblyLoader,
+        IHandle<ApplicationShuttingDown>,
         IHandle<ProjectLoaded>,
         IHandle<ProjectUnloaded>
     {
@@ -50,34 +51,43 @@ namespace MyCoolApp.Domain.Scripting
         {
             if (!_projectManager.HasScriptingProject) return;
 
-            LoadScriptingAssembly(_projectManager.Project.ScriptingAssemblyFilePath, ignoreMissingAssembly: true);
+            LoadScriptingAssembly(ignoreMissingAssembly: true);
         }
 
-        private void LoadScriptingAssembly(string scriptingAssemblyPath, bool ignoreMissingAssembly = false)
+        private void LoadScriptingAssembly(bool ignoreMissingAssembly = false)
         {
             if (!_projectManager.HasScriptingProject) return;
 
-            if (scriptingAssemblyPath != _projectManager.Project.ScriptingAssemblyFilePath)
-                throw new InvalidOperationException(
-                    string.Format(
-                        "The scripting assembly path did not match what was expected by the project. Expected: '{0}' Actual: '{1}'",
-                        _projectManager.Project.ScriptingAssemblyFilePath, scriptingAssemblyPath));
-
-            if (ignoreMissingAssembly == false && File.Exists(scriptingAssemblyPath) == false)
+            var scriptingAssemblyPath = _projectManager.Project.ScriptingAssemblyFilePath;
+            if (File.Exists(scriptingAssemblyPath) == false)
+            {
+                if (ignoreMissingAssembly) return;
                 throw new FileNotFoundException("The scripting assembly was not found.", scriptingAssemblyPath);
+            }
 
-            var project = _projectManager.Project;
-            var fileToLoad = scriptingAssemblyPath ?? project.ScriptingAssemblyFilePath;
+            // Load the assembly with debugging symbols if available
+            var symbolsPath = _projectManager.Project.ScriptingSymbolsFilePath;
+            Assembly assembly;
+            if (File.Exists(symbolsPath))
+            {
+                _logger.Info("Loading Scripting assembly and symbols at {0}", scriptingAssemblyPath);
+                var assemblyBytes = File.ReadAllBytes(scriptingAssemblyPath);
+                var symbolBytes = File.ReadAllBytes(symbolsPath);
+                assembly = Assembly.Load(assemblyBytes, symbolBytes);
+            }
+            else
+            {
+                _logger.Info("Loading Scripting assembly without symbols {0}", scriptingAssemblyPath);
+                var assemblyBytes = File.ReadAllBytes(scriptingAssemblyPath);
+                assembly = Assembly.Load(assemblyBytes);
+            }
 
-            _logger.Info("Loading Scripting assembly at {0}", project.ScriptingAssemblyFilePath);
-            var assemblyBytes = File.ReadAllBytes(project.ScriptingAssemblyFilePath);
-            var symbolBytes = File.ReadAllBytes(project.ScriptingSymbolsFilePath);
-            var assembly = Assembly.Load(assemblyBytes, symbolBytes);
-
+            // Keep a reference so we can late bind to this assembly by assembly name as required
             _loadedScriptingAssemblies.AddOrUpdate(assembly.FullName, assembly, (key, existingAssembly) => assembly);
             _currentScriptingAssembly = assembly;
             _logger.Info("Loaded {0}", assembly.FullName);
             
+            // Let the world know we have a new scripting assembly with new scripts available
             var scriptNames = _currentScriptingAssembly
                 .GetTypes()
                 .Where(t => t.GetMethods().Any(m => m.Name == "Main" && m.IsStatic && !m.GetParameters().Any()))
@@ -93,7 +103,7 @@ namespace MyCoolApp.Domain.Scripting
             if (_projectManager.IsProjectLoaded &&
                 e.ScriptingAssemblyPath == _projectManager.Project.ScriptingAssemblyFilePath)
             {
-                LoadScriptingAssembly(e.ScriptingAssemblyPath);
+                LoadScriptingAssembly();
             }
         }
 
@@ -107,31 +117,33 @@ namespace MyCoolApp.Domain.Scripting
                     return _loadedScriptingAssemblies[assemblyName];
                 }
 
-                await SleepAsync(500);
+                await Sleeper.SleepAsync(500);
             }
 
             return null;
         }
 
-        public Task SleepAsync(int millisecondsTimeout)
+        private void Clear()
         {
-            TaskCompletionSource<bool> tcs = null;
-            var t = new Timer(unusedState => tcs.TrySetResult(true), null, -1, -1);
-            tcs = new TaskCompletionSource<bool>(t);
-            t.Change(millisecondsTimeout, -1);
-            return tcs.Task;
+            _currentScriptingAssembly = null;
+            _loadedScriptingAssemblies.Clear();
         }
 
         public void Handle(ProjectLoaded message)
         {
-            _currentScriptingAssembly = null;
-            _loadedScriptingAssemblies.Clear();
+            Clear();
             LoadScriptingAssemblyIfAvailable();
         }
 
         public void Handle(ProjectUnloaded message)
         {
-            _currentScriptingAssembly = null;
+            Clear();
+        }
+
+        public void Handle(ApplicationShuttingDown message)
+        {
+            _globalEventAggregator.Unsubscribe(this);
+            Clear();
         }
     }
 }

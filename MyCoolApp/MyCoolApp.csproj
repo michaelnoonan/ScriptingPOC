@@ -57,10 +57,18 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Busy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Busy.Designer.cs">
+      <DependentUpon>Busy.cs</DependentUpon>
+    </Compile>
     <Compile Include="Shell.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -69,6 +77,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Busy.resx">
+      <DependentUpon>Busy.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Shell.resx">
       <DependentUpon>Shell.cs</DependentUpon>
       <SubType>Designer</SubType>

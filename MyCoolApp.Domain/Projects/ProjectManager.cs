@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Caliburn.Micro;
-using MyCoolApp.Domain.Events;
 using MyCoolApp.Domain.Events.Projects;
 using MyCoolApp.Domain.Persistence;
 
@@ -52,7 +51,7 @@ namespace MyCoolApp.Domain.Projects
                 throw new InvalidOperationException("A project already exists at " + projectFilePath);
 
             Project = new Project(projectFilePath);
-            Project.AddPlannedActivity(DateTime.Now, "Create my first activity.");
+            Project.Schedule.AddPlannedActivity(DateTime.Now, "Create my first activity.");
             SaveProject();
             _globalEventAggregator.Publish(new ProjectLoaded(Project));
         }
@@ -74,7 +73,7 @@ namespace MyCoolApp.Domain.Projects
                 throw new InvalidOperationException("There is no project loaded to save!");
 
             _projectSaver.SaveProject(Project);
-            Project.MarkAsClean();
+            Project.Schedule.MarkAsClean();
         }
 
         public void UnloadProject()

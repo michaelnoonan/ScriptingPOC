@@ -14,7 +14,7 @@ namespace MyCoolApp.Domain.Scripting
             new ScriptingService(
                 SharpDevelopIntegrationService.Instance,
                 new ScriptingAssemblyLoader(ProjectManager.Instance, new ScriptingAssemblyFileWatcher(GlobalEventAggregator.Instance), GlobalEventAggregator.Instance, Logger.Instance),
-                new ScriptExecutor(Logger.Instance), 
+                new ScriptExecutor(ProjectManager.Instance, Logger.Instance), 
                 GlobalEventAggregator.Instance,
                 Logger.Instance);
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization;
-using MyCoolApp.Domain.Model;
 using MyCoolApp.Domain.Projects;
 
 namespace MyCoolApp.Domain.Persistence
@@ -19,7 +18,7 @@ namespace MyCoolApp.Domain.Persistence
                 var projectData = (ProjectData)dcs.ReadObject(sr);
                 foreach (var a in projectData.PlannedActivities)
                 {
-                    project.PlannedActivities.Add(new PlannedActivityViewModel(a.PlannedFor, a.Description));
+                    project.Schedule.AddPlannedActivity(a.PlannedFor, a.Description);
                 }
             }
             return project;

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
+using MyCoolApp.Domain;
 using MyCoolApp.Domain.Development;
 using MyCoolApp.Domain.Diagnostics;
+using MyCoolApp.Domain.Events;
 
 namespace MyCoolApp
 {

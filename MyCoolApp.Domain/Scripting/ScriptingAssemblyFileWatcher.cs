@@ -2,15 +2,18 @@
 using System.IO;
 using System.Threading;
 using Caliburn.Micro;
+using MyCoolApp.Domain.Events;
 using MyCoolApp.Domain.Events.Projects;
 
 namespace MyCoolApp.Domain.Scripting
 {
     public class ScriptingAssemblyFileWatcher :
+        IHandle<ApplicationShuttingDown>,
         IHandle<ProjectLoaded>,
         IHandle<ProjectUnloaded>,
         IHandle<ScriptingProjectCreated>
     {
+        private readonly IEventAggregator _globalEventAggregator;
         public event EventHandler<NewScriptingAssemblyEventArgs> NewScriptingAssemblyAvailable;
         private FileSystemWatcher _fileSystemWatcher;
         private Timer _fileLockTimer;
@@ -18,6 +21,7 @@ namespace MyCoolApp.Domain.Scripting
 
         public ScriptingAssemblyFileWatcher(IEventAggregator globalEventAggregator)
         {
+            _globalEventAggregator = globalEventAggregator;
             globalEventAggregator.Subscribe(this);
         }
 
@@ -46,6 +50,12 @@ namespace MyCoolApp.Domain.Scripting
 
         public void Handle(ProjectUnloaded message)
         {
+            StopWatchingScriptingAssembly();
+        }
+
+        public void Handle(ApplicationShuttingDown message)
+        {
+            _globalEventAggregator.Unsubscribe(this);
             StopWatchingScriptingAssembly();
         }
 

@@ -11,7 +11,7 @@ namespace SharpDevelopRemoteControl.Contracts
         [OperationContract]
         void LoadScriptingProject(string projectFilePath);
 
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void ShutDown();
 
         [OperationContract]

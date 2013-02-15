@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.ServiceModel;
 using ICSharpCode.Core;
 using ICSharpCode.SharpDevelop;
@@ -12,12 +13,13 @@ namespace SharpDevelopRemoteControl.AddIn
     {
         public static readonly HostApplicationAdapter Instance = new HostApplicationAdapter(new CommandListener());
 
+        private readonly string _hostApplicationListenUri;
+        private readonly int? _hostApplicationProcessId;
         private readonly ICommandListener _commandListener;
         private readonly ChannelFactory<IHostApplicationService> _channelFactory;
-        private readonly string _hostApplicationListenUri;
-        private readonly int _hostApplicationProcessId;
+        private Process _hostApplicationProcess;
 
-        public int HostApplicationProcessId
+        public int? HostApplicationProcessId
         {
             get { return _hostApplicationProcessId; }
         }
@@ -31,7 +33,6 @@ namespace SharpDevelopRemoteControl.AddIn
                 if (arg.StartsWith(Constant.HostApplicationListenUriParameterToken))
                 {
                     _hostApplicationListenUri = arg.Replace(Constant.HostApplicationListenUriParameterToken, "").Trim();
-
                     LoggingService.InfoFormatted("The host application is listening for events on '{0}'",
                                  _hostApplicationListenUri);
                 }
@@ -39,7 +40,6 @@ namespace SharpDevelopRemoteControl.AddIn
                 if (arg.StartsWith(Constant.HostApplicationProcessIdParameterToken))
                 {
                     _hostApplicationProcessId = int.Parse(arg.Replace(Constant.HostApplicationProcessIdParameterToken, "").Trim());
-
                     LoggingService.InfoFormatted("The host application ProcessId is '{0}'", _hostApplicationProcessId);
                 }
             }
@@ -50,13 +50,34 @@ namespace SharpDevelopRemoteControl.AddIn
                 return;
             }
 
+            if (_hostApplicationProcessId == null)
+            {
+                LoggingService.Warn("The HostApplicationProcessId was not specified - not starting the HostApplicationAdapter.");
+                return;
+            }
+
+            _hostApplicationProcess = Process.GetProcessById(_hostApplicationProcessId.Value);
+            _hostApplicationProcess.EnableRaisingEvents = true;
+            _hostApplicationProcess.Exited += HostApplicationProcessExited;
+
             _channelFactory =
                 new ChannelFactory<IHostApplicationService>(
                     new NetNamedPipeBinding());
         }
 
+        private void HostApplicationProcessExited(object sender, EventArgs e)
+        {
+            LoggingService.Info("The host process has terminated so we will close too!");
+            WorkbenchSingleton.SafeThreadAsyncCall(WorkbenchSingleton.MainWindow.Close);
+        }
+
         public void Dispose()
         {
+            if (_hostApplicationProcess != null)
+            {
+                _hostApplicationProcess.Dispose();
+                _hostApplicationProcess = null;
+            }
             if (_channelFactory != null)
             {
                 try
@@ -99,7 +120,7 @@ namespace SharpDevelopRemoteControl.AddIn
             }
         }
 
-        private void ExecuteOperation(Action<IHostApplicationService> operation)
+        public void PublishEvent(Action<IHostApplicationService> operation)
         {
             if (IsEnabled == false) return;
 
@@ -111,8 +132,7 @@ namespace SharpDevelopRemoteControl.AddIn
             }
             catch (Exception ex)
             {
-                LoggingService.Error("Failed to execute operation on RemoteControlHostService", ex);
-                throw;
+                LoggingService.Error("Failed to publish the event...", ex);
             }
         }
 
@@ -122,38 +142,22 @@ namespace SharpDevelopRemoteControl.AddIn
 
             var listenUri = _commandListener.ListenUri;
             LoggingService.InfoFormatted("Announcing remote control ready on {0}...", listenUri);
-            ExecuteOperation(c => c.RemoteControlAvailable(listenUri));
+            PublishEvent(c => c.RemoteControlAvailable(listenUri));
         }
 
         private void AnnounceRemoteControlInterfaceShuttingDownSafely(object sender, EventArgs e)
         {
-            try
-            {
-                ExecuteOperation(c => c.DevelopmentEnvironmentShuttingDown());
-            }
-            catch
-            {
-                // Deliberately discard any exception on shutdown
-                // It's likely the host application has gone away...
-            }
+            PublishEvent(c => c.DevelopmentEnvironmentShuttingDown());
         }
 
         private void AnnounceSolutionClosed(object sender, EventArgs eventArgs)
         {
-            try
-            {
-                ExecuteOperation(c => c.ScriptingProjectUnloaded());
-            }
-            catch
-            {
-                // Deliberately discard any exception on shutdown
-                // It's likely the host application has gone away...
-            }
+            PublishEvent(c => c.ScriptingProjectUnloaded());
         }
 
         public void AnnounceScriptingProjectLoaded(LoadScriptingProjectResult result)
         {
-            ExecuteOperation(c => c.ScriptingProjectLoaded(result));
+            PublishEvent(c => c.ScriptingProjectLoaded(result));
         }
 
         public ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName)

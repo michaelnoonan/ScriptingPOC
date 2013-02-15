@@ -3,17 +3,21 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using MyCoolApp.Domain.Diagnostics;
+using MyCoolApp.Domain.Projects;
+using MyCoolApp.Domain.Scripting.Adapters;
 using SharpDevelopRemoteControl.Contracts;
 
 namespace MyCoolApp.Domain.Scripting
 {
     public class ScriptExecutor : IScriptExecutor
     {
+        private readonly IProjectManager _projectManager;
         private readonly ILogger _logger;
         private bool _currentlyExecuting;
 
-        public ScriptExecutor(ILogger logger)
+        public ScriptExecutor(IProjectManager projectManager, ILogger logger)
         {
+            _projectManager = projectManager;
             _logger = logger;
         }
 
@@ -49,6 +53,8 @@ namespace MyCoolApp.Domain.Scripting
                 throw new Exception(
                     string.Format("The method '{0}' should be static and have no parameters.", method.Name));
 
+            InjectProperties(declaringClass);
+
             var startedAt = DateTime.MinValue;
             var completedAt = DateTime.MinValue;
             try
@@ -65,6 +71,39 @@ namespace MyCoolApp.Domain.Scripting
                 _currentlyExecuting = false;
                 _logger.Error(e, "The script failed with an exception.");
                 return ScriptExecutionResult.Failed(e.Message, completedAt - startedAt);
+            }
+        }
+
+        private void InjectProperties(Type declaringClass)
+        {
+            Inject<ILogger>(declaringClass, _logger);
+            Inject<ISchedule>(declaringClass, new ScheduleAdapter(_projectManager.Project.Schedule));
+        }
+
+        private void Inject<T>(Type declaringClass, object instance)
+        {
+            var properties = declaringClass.GetProperties();
+
+            foreach (PropertyInfo p in properties)
+            {
+                if (p.PropertyType != typeof (T))
+                {
+                    continue;
+                }
+
+                // If not writable then cannot null it; if not readable then cannot check it's value
+                if (!p.CanWrite || !p.CanRead)
+                {
+                    continue;
+                }
+
+                // Check the accessibility of the Set method
+                var mset = p.GetSetMethod(nonPublic: false);
+                if (mset == null)
+                {
+                    continue;
+                }
+                p.SetValue(null, instance);
             }
         }
     }

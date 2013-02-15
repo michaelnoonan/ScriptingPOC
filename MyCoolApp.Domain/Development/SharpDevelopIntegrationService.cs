@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Threading;
@@ -20,6 +21,7 @@ namespace MyCoolApp.Domain.Development
     public class SharpDevelopIntegrationService :
         ISharpDevelopIntegrationService,
         IDisposable,
+        IHandle<ApplicationShuttingDown>,
         IHandle<ProjectLoaded>,
         IHandle<ProjectUnloaded>,
         IHandle<DevelopmentEnvironmentConnected>,
@@ -47,6 +49,8 @@ namespace MyCoolApp.Domain.Development
 
         public string RemoteControlUri { get; private set; }
         public bool IsConnectionEstablished { get { return RemoteControlUri != null; } }
+        public bool IsSharpDevelopRunning { get { return _sharpDevelopProcess != null && _sharpDevelopProcess.HasExited == false; } }
+        public bool WaitingForSharpDevelopToStart { get { return IsSharpDevelopRunning && IsConnectionEstablished == false; } }
 
         private LoadScriptingProjectResult _loadScriptingProjectResult;
 
@@ -89,9 +93,19 @@ namespace MyCoolApp.Domain.Development
                 _globalEventAggregator.Publish(new ScriptingProjectCreated(project));
             }
 
-            await StartDevelopmentEnvironment();
+            CopyScriptingDependencies(project.ScriptingDependenciesFolder);
+
+            await StartDevelopmentEnvironmentAsync();
             var result = await LoadProjectInDevelopmentEnvironment(scriptingProjectFilePath);
             return result;
+        }
+
+        private void CopyScriptingDependencies(string scriptingDependenciesFolder)
+        {
+            Directory.CreateDirectory(scriptingDependenciesFolder);
+            var sourceFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            File.Copy(Path.Combine(sourceFolder, "MyCoolApp.Scripting.dll"), Path.Combine(scriptingDependenciesFolder, "MyCoolApp.Scripting.dll"), overwrite: true);
+            File.Copy(Path.Combine(sourceFolder, "MyCoolApp.Domain.dll"), Path.Combine(scriptingDependenciesFolder, "MyCoolApp.Domain.dll"), overwrite: true);
         }
 
         private async Task<LoadScriptingProjectResult> LoadProjectInDevelopmentEnvironment(string scriptingProjectFilePath)
@@ -104,7 +118,7 @@ namespace MyCoolApp.Domain.Development
             while (_loadScriptingProjectResult == null)
             {
                 _logger.Info("Waiting for project to load and finish building...");
-                await SleepAsync(1000);
+                await Sleeper.SleepAsync(1000);
             }
 
             var result = _loadScriptingProjectResult;
@@ -112,7 +126,7 @@ namespace MyCoolApp.Domain.Development
             return result;
         }
 
-        private async Task StartDevelopmentEnvironment()
+        private async Task StartDevelopmentEnvironmentAsync()
         {
             if (IsConnectionEstablished) return;
 
@@ -126,17 +140,8 @@ namespace MyCoolApp.Domain.Development
             while (IsConnectionEstablished == false)
             {
                 _logger.Info("Waiting for development environment to finish starting...");
-                await SleepAsync(1000);
+                await Sleeper.SleepAsync(1000);
             }
-        }
-
-        public Task SleepAsync(int millisecondsTimeout)
-        {
-            TaskCompletionSource<bool> tcs = null;
-            var t = new Timer(unusedState => tcs.TrySetResult(true), null, -1, -1);
-            tcs = new TaskCompletionSource<bool>(t);
-            t.Change(millisecondsTimeout, -1);
-            return tcs.Task;
         }
 
         private string BuildSharpDevelopArgumentString()
@@ -176,7 +181,7 @@ namespace MyCoolApp.Domain.Development
 
         public void Handle(ProjectUnloaded message)
         {
-            ShutDownDevelopmentEnvironmentSafely();
+            ShutDownDevelopmentEnvironmentSafelyAsync();
         }
 
         public void Handle(DevelopmentEnvironmentConnected message)
@@ -186,7 +191,7 @@ namespace MyCoolApp.Domain.Development
 
         public void Handle(DevelopmentEnvironmentDisconnected message)
         {
-            ShutDownDevelopmentEnvironmentSafely();
+            ShutDownDevelopmentEnvironmentSafelyAsync();
         }
 
         private void SharpDevelopProcessExited(object sender, EventArgs e)
@@ -198,12 +203,15 @@ namespace MyCoolApp.Domain.Development
 
             try
             {
-                ShutDownDevelopmentEnvironmentSafely();
+                ShutDownDevelopmentEnvironmentSafelyAsync();
             }
             finally
             {
-                _sharpDevelopProcess.Dispose();
-                _sharpDevelopProcess = null;
+                if (_sharpDevelopProcess != null)
+                {
+                    _sharpDevelopProcess.Dispose();
+                    _sharpDevelopProcess = null;
+                }
             }
         }
 
@@ -217,29 +225,60 @@ namespace MyCoolApp.Domain.Development
 
         public void Handle(ScriptingProjectUnloadedInDevelopmentEnvironment message)
         {
-            ShutDownDevelopmentEnvironmentSafely();
+            ShutDownDevelopmentEnvironmentSafelyAsync();
         }
 
-        private void ShutDownDevelopmentEnvironmentSafely()
+        public void Handle(ApplicationShuttingDown message)
         {
-            if (IsConnectionEstablished)
+            _globalEventAggregator.Unsubscribe(this);
+            ShutDownDevelopmentEnvironmentSafelyAsync();
+        }
+
+        private async void ShutDownDevelopmentEnvironmentSafelyAsync()
+        {
+            if (WaitingForSharpDevelopToStart)
+            {
+                _sharpDevelopProcess.Kill();
+                _sharpDevelopProcess.Dispose();
+                _sharpDevelopProcess = null;
+            }
+            else if (IsConnectionEstablished)
             {
                 try
                 {
-                    var client = _channelFactory.CreateChannel(new EndpointAddress(RemoteControlUri));
-                    client.ShutDown();
+                    var uri = RemoteControlUri;
                     SetRemoteControlUri(null);
+                    var client = _channelFactory.CreateChannel(new EndpointAddress(uri));
+                    client.ShutDown();
                 }
                 catch
                 {
                     // Deliberately ignore any exception here since the most likely one is the environment is already gone!
                 }
             }
+            else if (IsSharpDevelopRunning)
+            {
+                // SharpDevelop is still running but we're not connected to it via WCF
+                var startedWaiting = DateTime.Now;
+                var timeout = startedWaiting + TimeSpan.FromSeconds(20);
+                while (DateTime.Now < timeout && IsSharpDevelopRunning)
+                {
+                    await Sleeper.SleepAsync(1000);
+                }
+
+                if (IsSharpDevelopRunning)
+                {
+                    _sharpDevelopProcess.Kill();
+                    _sharpDevelopProcess.Dispose();
+                    _sharpDevelopProcess = null;
+                }
+            }
         }
 
         public void Dispose()
         {
-            ShutDownDevelopmentEnvironmentSafely();
+            _globalEventAggregator.Unsubscribe(this);
+            ShutDownDevelopmentEnvironmentSafelyAsync();
 
             if (_channelFactory != null)
             {

@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.ServiceModel;
 using ICSharpCode.AvalonEdit.AddIn;
 using ICSharpCode.Core;
@@ -40,6 +43,8 @@ namespace SharpDevelopRemoteControl.AddIn
                 LoggingService.Info("The project is already loaded.");
             }
 
+            EnsureScriptingDependenciesAreReferenced(project);
+
             BuildEngine.BuildInGui(
                 project,
                 new BuildOptions(BuildTarget.Rebuild,
@@ -47,10 +52,42 @@ namespace SharpDevelopRemoteControl.AddIn
                                      new LoadScriptingProjectResult(projectFilePath, buildResults.Result == BuildResultCode.Success))));
         }
 
+        private void EnsureScriptingDependenciesAreReferenced(IProject project)
+        {
+            var libFolder = Path.Combine(Path.GetDirectoryName(project.FileName), "Lib");
+
+            EnsureReference(project, Path.Combine(libFolder, "MyCoolApp.Scripting.dll"));
+            EnsureReference(project, Path.Combine(libFolder, "MyCoolApp.Domain.dll"));
+            project.Save();
+        }
+
+        private void EnsureReference(IProject project, string assemblyFile)
+        {
+            LoggingService.InfoFormatted("Checking for {0}", assemblyFile);
+            var matchingReferences = project.Items.OfType<ReferenceProjectItem>().Where(r => r.FileName == assemblyFile).ToArray();
+            if (matchingReferences.Any() == false)
+            {
+                LoggingService.InfoFormatted("Adding reference to {0}", assemblyFile);
+                var assemblyReference = new ReferenceProjectItem(project);
+                assemblyReference.Include = Path.GetFileNameWithoutExtension(assemblyFile);
+                assemblyReference.HintPath = FileUtility.GetRelativePath(project.Directory, assemblyFile);
+                ProjectService.AddProjectItem(project, assemblyReference);
+            }
+            LoggingService.InfoFormatted("Already have reference to {0}", assemblyFile);
+        }
+
         public void ShutDown()
         {
             LoggingService.Info("Shutdown command received...");
-            WorkbenchSingleton.MainWindow.Close();
+            if (BuildEngine.IsGuiBuildRunning)
+            {
+                LoggingService.Info("Time to kill!");
+                Process.GetCurrentProcess().Kill();
+            }
+            else
+            {
+                WorkbenchSingleton.MainWindow.Close();
+            }
         }
 
         public void StartDebuggingScript(string className)

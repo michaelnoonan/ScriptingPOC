@@ -49,9 +49,12 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
 
         private static void AttachDebugger(ScriptContext context)
         {
+            if (HostApplicationAdapter.Instance.HostApplicationProcessId == null)
+                throw new InvalidOperationException("Cannot attach the debugger because the host process is not known.");
+
             WorkbenchSingleton.StatusBar.SetMessage("Attaching the debugger...");
-            LoggingService.Info("Attaching to process with ID: " + HostApplicationAdapter.Instance.HostApplicationProcessId);
-            var process = Process.GetProcessById(HostApplicationAdapter.Instance.HostApplicationProcessId);
+            LoggingService.Info("Attaching to process with ID: " + HostApplicationAdapter.Instance.HostApplicationProcessId.Value);
+            var process = Process.GetProcessById(HostApplicationAdapter.Instance.HostApplicationProcessId.Value);
             LoggingService.Info("Process Name is: " + process.ProcessName);
             if (process.HasExited)
             {

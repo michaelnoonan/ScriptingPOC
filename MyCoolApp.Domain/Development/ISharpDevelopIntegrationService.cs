@@ -7,5 +7,9 @@ namespace MyCoolApp.Domain.Development
     {
         Task<LoadScriptingProjectResult> LoadAndBuildScriptingProjectAsync();
         Task StartDebuggingScriptAsync(string className);
+        string RemoteControlUri { get; }
+        bool IsConnectionEstablished { get; }
+        bool WaitingForSharpDevelopToStart { get; }
+        bool IsSharpDevelopRunning { get; }
     }
 }

@@ -53,6 +53,7 @@
     <Compile Include="Development\SharpDevelopIntegrationService.cs" />
     <Compile Include="Diagnostics\ILogger.cs" />
     <Compile Include="Diagnostics\Logger.cs" />
+    <Compile Include="Events\ApplicationShuttingDown.cs" />
     <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentConnected.cs" />
     <Compile Include="Events\DevelopmentEnvironment\DevelopmentEnvironmentDisconnected.cs" />
     <Compile Include="Events\DevelopmentEnvironment\ScriptingProjectLoadedInDevelopmentEnvironment.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Model\BindableBase.cs" />
     <Compile Include="Model\IDirty.cs" />
     <Compile Include="Model\PlannedActivityViewModel.cs" />
+    <Compile Include="Model\Schedule.cs" />
     <Compile Include="Persistence\PlannedActivity.cs" />
     <Compile Include="Persistence\ProjectData.cs" />
     <Compile Include="Persistence\ProjectLoader.cs" />
@@ -76,6 +78,8 @@
     <Compile Include="Projects\Project.cs" />
     <Compile Include="Projects\ProjectManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripting\Adapters\ISchedule.cs" />
+    <Compile Include="Scripting\Adapters\ScheduleAdapter.cs" />
     <Compile Include="Scripting\IScriptExecutor.cs" />
     <Compile Include="Scripting\IScriptingAssemblyLoader.cs" />
     <Compile Include="Scripting\IScriptingProjectBuilder.cs" />
@@ -84,9 +88,9 @@
     <Compile Include="Scripting\ScriptExecutor.cs" />
     <Compile Include="Scripting\ScriptingAssemblyFileWatcher.cs" />
     <Compile Include="Scripting\ScriptingAssemblyLoader.cs" />
-    <Compile Include="Scripting\ScriptingHostModel.cs" />
     <Compile Include="Scripting\ScriptingProjectBuilder.cs" />
     <Compile Include="Scripting\ScriptingService.cs" />
+    <Compile Include="ThreadExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharpDevelopRemoteControl.Contracts\SharpDevelopRemoteControl.Contracts.csproj">

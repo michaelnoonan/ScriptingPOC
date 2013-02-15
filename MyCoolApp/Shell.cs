@@ -1,10 +1,14 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using MyCoolApp.Domain;
 using Caliburn.Micro;
+using MyCoolApp.Domain;
+using MyCoolApp.Domain.Development;
 using MyCoolApp.Domain.Diagnostics;
 using MyCoolApp.Domain.Events;
 using MyCoolApp.Domain.Events.DevelopmentEnvironment;
@@ -14,6 +18,7 @@ using MyCoolApp.Domain.Events.Scripting;
 using MyCoolApp.Domain.Projects;
 using MyCoolApp.Domain.Scripting;
 using MyCoolApp.Properties;
+using Timer = System.Threading.Timer;
 
 namespace MyCoolApp
 {
@@ -30,21 +35,52 @@ namespace MyCoolApp
     {
         private const string DefaultApplicationTitle = "My Cool Planner";
 
+        public ISharpDevelopIntegrationService SharpDevelopIntegrationService { get; set; }
         public IProjectManager ProjectManager { get; set; }
         public IScriptingService ScriptingService { get; set; }
+        public IEventAggregator GlobalEventAggregator { get; set; }
         public ILogger Logger { get; set; }
 
         public Shell()
         {
+            Closing += ShellClosing;
             InitializeComponent();
-            GlobalEventAggregator.Instance.Subscribe(this);
-
+            GlobalEventAggregator = Domain.GlobalEventAggregator.Instance;
+            SharpDevelopIntegrationService = Domain.Development.SharpDevelopIntegrationService.Instance;
             ProjectManager = Domain.Projects.ProjectManager.Instance;
             ScriptingService = Domain.Scripting.ScriptingService.Instance;
             Logger = Domain.Diagnostics.Logger.Instance;
 
+            GlobalEventAggregator.Subscribe(this);
+
             SetTitle(DefaultApplicationTitle);
             EvaluateCommands();
+        }
+
+        private async void ShellClosing(object sender, CancelEventArgs e)
+        {
+            GlobalEventAggregator.Unsubscribe(this);
+            GlobalEventAggregator.Publish(new ApplicationShuttingDown());
+
+            if (SharpDevelopIntegrationService.IsSharpDevelopRunning)
+            {
+                e.Cancel = true;
+                var busy = new Busy();
+                busy.SetMessage("Waiting for SharpDevelop to shut down...");
+                busy.Show(this);
+                var startedWaiting = DateTime.Now;
+                var timeout = startedWaiting + TimeSpan.FromSeconds(20);
+                while (SharpDevelopIntegrationService.IsSharpDevelopRunning && DateTime.Now < timeout)
+                {
+                    await Sleeper.SleepAsync(1000);
+                    if (DateTime.Now - startedWaiting > TimeSpan.FromSeconds(5))
+                    {
+                        busy.SetMessage("Still waiting for SharpDevelop to shut down... maybe SharpDevelop has a question for you?");
+                    }
+                }
+                busy.NotBusyAnymore();
+                Close();
+            }
         }
 
         private void NewProjectToolStripMenuItemClick(object sender, EventArgs e)
@@ -90,7 +126,9 @@ namespace MyCoolApp
 
         public new void Handle(ProjectLoaded message)
         {
-            plannedActivitiesBindingSource.DataSource = message.LoadedProject.PlannedActivities;
+            if (IsDisposed) return;
+
+            plannedActivitiesBindingSource.DataSource = message.LoadedProject.Schedule.PlannedActivities;
             SetTitle(string.Format("{0} - {1}", message.LoadedProject.Name,
                                    message.LoadedProject.ProjectFilePath));
             StatusLabel.Text = string.Format("Project opened: {0}", message.LoadedProject.ProjectFilePath);
@@ -99,6 +137,8 @@ namespace MyCoolApp
 
         public new void Handle(ProjectUnloaded message)
         {
+            if (IsDisposed) return;
+
             plannedActivitiesBindingSource.Clear();
             SetTitle(DefaultApplicationTitle);
             StatusLabel.Text = string.Format("Project closed: {0}", message.UnloadedProject.ProjectFilePath);
@@ -107,8 +147,11 @@ namespace MyCoolApp
 
         public new void Handle(DevelopmentEnvironmentConnected message)
         {
+            if (IsDisposed) return;
+
             Invoke(new Action(() =>
                                   {
+                                      if (IsDisposed) return;
                                       Logger.Info("Development environment remote control on {0}", message.ListenUri);
                                       statusConnectedToIDE.Visible = true;
                                       statusNotConnectedToIDE.Visible = false;
@@ -119,8 +162,10 @@ namespace MyCoolApp
         public new void Handle(DevelopmentEnvironmentDisconnected message)
         {
             if (IsDisposed) return;
+
             Invoke(new Action(() =>
                                   {
+                                      if (IsDisposed) return;
                                       Logger.Info("Development environment disconnected.");
                                       statusConnectedToIDE.Visible = false;
                                       statusNotConnectedToIDE.Visible = true;
@@ -132,7 +177,11 @@ namespace MyCoolApp
         {
             if (IsDisposed) return;
 
-            Invoke(new Action(() => LoadNewScriptingOptions(message)));
+            Invoke(new Action(() =>
+                                  {
+                                      if (IsDisposed) return;
+                                      LoadNewScriptingOptions(message);
+                                  }));
         }
 
         private void LoadNewScriptingOptions(ScriptingAssemblyLoaded message)
@@ -194,6 +243,8 @@ namespace MyCoolApp
 
         public new void Handle(LogErrorEvent message)
         {
+            if (IsDisposed) return;
+
             Invoke(new Action(
                        () =>
                            {
@@ -229,12 +280,6 @@ namespace MyCoolApp
                 return false;
             }
             
-            //if (keyData == Keys.F5)
-            //{
-            //    ExecuteScriptAsync(ScriptTextBox.Text);
-            //    return false;
-            //}
-
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
