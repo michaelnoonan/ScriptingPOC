@@ -107,7 +107,7 @@ namespace MyCoolApp.Domain.Scripting
             }
         }
 
-        public async Task<Assembly> GetAssemblyWithWait(string assemblyName, TimeSpan timeToWaitForAssembly)
+        public async Task<Assembly> GetAssemblyAsync(string assemblyName, TimeSpan timeToWaitForAssembly)
         {
             var timeoutExpiry = DateTime.Now + timeToWaitForAssembly;
             while (DateTime.Now < timeoutExpiry)

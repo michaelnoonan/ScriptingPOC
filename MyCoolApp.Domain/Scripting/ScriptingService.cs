@@ -58,18 +58,13 @@ namespace MyCoolApp.Domain.Scripting
             await _sharpDevelopIntegrationService.StartDebuggingScriptAsync(className);
         }
 
-        public ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName)
+        public async Task<ScriptExecutionResult> ExecuteScriptForDebuggingAsync(string assemblyName, string className, string methodName)
         {
             _logger.Info("Execute Script in class {0} method {1} from {2}", className, methodName, assemblyName);
             
             // Wait for the assembly to be loaded completely before continuing with executing the script
-            var assemblyTask = _scriptingAssemblyLoader.GetAssemblyWithWait(assemblyName, TimeSpan.FromSeconds(10));
-            assemblyTask.Wait(TimeSpan.FromSeconds(15));
-            if (assemblyTask.Status == TaskStatus.RanToCompletion)
-            {
-                return _scriptExecutor.ExecuteScript(assemblyTask.Result, className, methodName);
-            }
-            throw new Exception("Failed to execute the script. Inner exceptions may provide more information.", assemblyTask.Exception);
+            var assembly = await _scriptingAssemblyLoader.GetAssemblyAsync(assemblyName, TimeSpan.FromSeconds(10));
+            return await _scriptExecutor.ExecuteScriptAsync(assembly, className, methodName);
         }
     }
 }

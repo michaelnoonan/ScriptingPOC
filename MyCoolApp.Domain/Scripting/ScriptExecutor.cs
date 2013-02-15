@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using MyCoolApp.Domain.Diagnostics;
 using MyCoolApp.Domain.Projects;
@@ -27,13 +28,15 @@ namespace MyCoolApp.Domain.Scripting
                 throw new InvalidOperationException("A script is currently executing - only one script can execute at a time.");
         }
 
-        public Task<ScriptExecutionResult> ExecuteScriptAsync(Assembly assembly, string className, string methodName)
+        public Task<ScriptExecutionResult> ExecuteScriptAsync(Assembly assembly, string className, string methodName, CancellationToken cancellation = new CancellationToken())
         {
-            return Task.Run(() => ExecuteScript(assembly, className, methodName));
+            return Task.Run(() => ExecuteScript(assembly, className, methodName), cancellation);
         }
 
-        public ScriptExecutionResult ExecuteScript(Assembly assembly, string className, string methodName)
+        private ScriptExecutionResult ExecuteScript(Assembly assembly, string className, string methodName)
         {
+            if (assembly == null) throw new ArgumentNullException("assembly");
+
             AssertSingleScript();
             _currentlyExecuting = true;
 

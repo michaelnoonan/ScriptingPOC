@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.ServiceModel;
+using System.Threading.Tasks;
 using ICSharpCode.Core;
 using ICSharpCode.SharpDevelop;
 using ICSharpCode.SharpDevelop.Gui;
@@ -160,9 +161,9 @@ namespace SharpDevelopRemoteControl.AddIn
             PublishEvent(c => c.ScriptingProjectLoaded(result));
         }
 
-        public ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName)
+        public Task<ScriptExecutionResult> ExecuteScriptForDebuggingAsync(string assemblyName, string className, string methodName)
         {
-            return ExecuteOperation(c => c.ExecuteScriptForDebugging(assemblyName, className, methodName));
+            return ExecuteOperation(c => c.ExecuteScriptForDebuggingAsync(assemblyName, className, methodName));
         }
     }
 }

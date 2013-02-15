@@ -88,13 +88,11 @@ namespace SharpDevelopRemoteControl.AddIn.Scripting
 
             WorkbenchSingleton.StatusBar.SetMessage("Executing script in " + assemblyName);
 
-            var task = new Task<ScriptExecutionResult>(
-                () => HostApplicationAdapter.Instance.ExecuteScriptForDebugging(
-                    assemblyName,
-                    context.DeclaringClass.FullyQualifiedName,
-                    context.Method.Name));
+            var task = HostApplicationAdapter.Instance.ExecuteScriptForDebuggingAsync(
+                assemblyName,
+                context.DeclaringClass.FullyQualifiedName,
+                context.Method.Name);
             task.ContinueWith(completedTask => HandleScriptExecutionComplete(completedTask, context));
-            task.Start(TaskScheduler.Default);
         }
 
         private static void HandleScriptExecutionComplete(Task<ScriptExecutionResult> completedTask, ScriptContext context)

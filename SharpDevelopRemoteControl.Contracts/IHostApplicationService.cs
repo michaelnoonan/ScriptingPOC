@@ -1,4 +1,5 @@
 ﻿using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace SharpDevelopRemoteControl.Contracts
 {
@@ -12,7 +13,7 @@ namespace SharpDevelopRemoteControl.Contracts
         void DevelopmentEnvironmentShuttingDown();
 
         [OperationContract]
-        ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName);
+        Task<ScriptExecutionResult> ExecuteScriptForDebuggingAsync(string assemblyName, string className, string methodName);
 
         [OperationContract(IsOneWay = true)]
         void ScriptingProjectLoaded(LoadScriptingProjectResult result);

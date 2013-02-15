@@ -1,4 +1,5 @@
 using System.ServiceModel;
+using System.Threading.Tasks;
 using Caliburn.Micro;
 using MyCoolApp.Domain.Events.DevelopmentEnvironment;
 using MyCoolApp.Domain.Scripting;
@@ -28,9 +29,9 @@ namespace MyCoolApp.Domain.Development
             _globalEventAggregator.Publish(new DevelopmentEnvironmentDisconnected());
         }
 
-        public ScriptExecutionResult ExecuteScriptForDebugging(string assemblyName, string className, string methodName)
+        public Task<ScriptExecutionResult> ExecuteScriptForDebuggingAsync(string assemblyName, string className, string methodName)
         {
-            return _scriptingService.ExecuteScriptForDebugging(assemblyName, className, methodName);
+            return _scriptingService.ExecuteScriptForDebuggingAsync(assemblyName, className, methodName);
         }
 
         public void ScriptingProjectLoaded(LoadScriptingProjectResult result)
